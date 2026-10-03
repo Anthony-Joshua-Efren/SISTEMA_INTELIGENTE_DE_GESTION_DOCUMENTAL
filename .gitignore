@@ -1,0 +1,27 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Variables de entorno (¡CREDENCIALES!)
+.env
+
+# Base de datos local
+db.sqlite3
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# PyCharm / IDE
+.idea/
+*.iml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Media y Static (subidos por usuarios)
+media/
+staticfiles/
