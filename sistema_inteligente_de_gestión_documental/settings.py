@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Principal.apps.PrincipalConfig',
+    'usuarios.apps.UsuariosConfig',
+    'documentos.apps.DocumentosConfig',
+    'auditoria.apps.AuditoriaConfig',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +143,5 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+AUTH_USER_MODEL = 'usuarios.Usuario'
