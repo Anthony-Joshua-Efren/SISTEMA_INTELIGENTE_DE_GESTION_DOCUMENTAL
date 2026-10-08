@@ -1,7 +1,8 @@
-/* =========================================================
+
+/* ==========================================================
    LOGIN - SISTEMA INTELIGENTE DE GESTIÓN DOCUMENTAL
    Sofitel Mexico City Reforma
-   ========================================================= */
+   ========================================================== */
 
 * {
     box-sizing: border-box;
@@ -18,10 +19,9 @@ body {
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
-
-/* =========================================================
+/* ==========================================================
    FONDO
-   ========================================================= */
+   ========================================================== */
 
 .login-page {
     position: relative;
@@ -35,36 +35,28 @@ body {
     overflow: hidden;
 }
 
-
-/* Oscurece la fotografía para mejorar la lectura */
-
 .background-overlay {
     position: absolute;
     inset: 0;
 
-    background:
-        linear-gradient(
-            90deg,
-            rgba(7, 15, 20, 0.70) 0%,
-            rgba(7, 15, 20, 0.45) 48%,
-            rgba(7, 15, 20, 0.58) 100%
-        );
+    background: linear-gradient(
+        90deg,
+        rgba(7, 15, 20, 0.70) 0%,
+        rgba(7, 15, 20, 0.45) 48%,
+        rgba(7, 15, 20, 0.58) 100%
+    );
 
     z-index: 1;
 }
-
-
-/* Todo el contenido queda encima del fondo */
 
 .login-content {
     position: relative;
     z-index: 2;
 }
 
-
-/* =========================================================
+/* ==========================================================
    INFORMACIÓN IZQUIERDA
-   ========================================================= */
+   ========================================================== */
 
 .system-information {
     width: 100%;
@@ -74,21 +66,19 @@ body {
     padding: 0 40px;
 
     text-align: center;
-
     color: #ffffff;
 
-    text-shadow:
-        0 3px 18px rgba(0, 0, 0, 0.45);
+    text-shadow: 0 3px 18px rgba(0, 0, 0, 0.45);
 }
 
 .hotel-name {
     margin-bottom: 18px;
 
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.20em;
 
-    color: rgba(255, 255, 255, 0.85);
+    color: #ffffff;
 }
 
 .system-information h1 {
@@ -101,58 +91,55 @@ body {
 }
 
 .system-description {
-    max-width: 610px;
+    max-width: 650px;
     margin: 0 auto;
 
-    font-size: 1.05rem;
+    font-size: 1.15rem;
     line-height: 1.7;
 
-    color: rgba(255, 255, 255, 0.82);
+    color: #ffffff;
 }
 
-
-/* =========================================================
+/* ==========================================================
    TARJETA DEL LOGIN
-   ========================================================= */
+   ========================================================== */
 
 .login-card {
-    width: calc(100% - 40px);
-    max-width: 440px;
+    width: 100%;
+    max-width: 520px;
 
-    padding: 42px 38px;
+    margin: 0 auto;
+    padding: 48px 44px;
 
-    background: rgba(255, 255, 255, 0.90);
+    background: rgba(255, 255, 255, 0.92);
 
     border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 22px;
 
-    box-shadow:
-        0 25px 70px rgba(0, 0, 0, 0.30);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.30);
 
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
 }
 
-
-/* =========================================================
+/* ==========================================================
    ENCABEZADO
-   ========================================================= */
+   ========================================================== */
 
 .brand-name {
     font-family: Georgia, "Times New Roman", serif;
 
-    font-size: 1.35rem;
+    font-size: 1.8rem;
     font-weight: 500;
-
     letter-spacing: 0.28em;
 
     color: #171717;
 }
 
 .login-title {
-    margin-bottom: 7px;
+    margin-bottom: 9px;
 
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 650;
 
     color: #161616;
@@ -161,15 +148,15 @@ body {
 .login-subtitle {
     margin-bottom: 0;
 
-    font-size: 0.92rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
 
-    color: #6d6d6d;
+    color: #555555;
 }
 
-
-/* =========================================================
+/* ==========================================================
    CAMPOS
-   ========================================================= */
+   ========================================================== */
 
 .input-group-custom {
     position: relative;
@@ -178,9 +165,9 @@ body {
     align-items: center;
 
     width: 100%;
-    height: 56px;
+    height: 58px;
 
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.88);
 
     border: 1px solid #d9d9d9;
     border-radius: 12px;
@@ -193,25 +180,23 @@ body {
 
 .input-group-custom:focus-within {
     background: #ffffff;
-
     border-color: #9b7a4b;
 
-    box-shadow:
-        0 0 0 4px rgba(155, 122, 75, 0.10);
+    box-shadow: 0 0 0 4px rgba(155, 122, 75, 0.10);
 }
 
 .input-icon {
     flex-shrink: 0;
 
     margin-left: 17px;
-
-    font-size: 1.15rem;
+    font-size: 1.2rem;
 
     color: #777777;
 }
 
 .login-input {
     width: 100%;
+    min-width: 0;
     height: 100%;
 
     padding: 0 16px;
@@ -221,23 +206,21 @@ body {
     border: none;
     outline: none;
 
-    font-size: 0.98rem;
-
+    font-size: 1.05rem;
     color: #202020;
 }
 
 .login-input::placeholder {
-    color: #949494;
+    color: #777777;
 }
 
 .password-input {
     padding-right: 5px;
 }
 
-
-/* =========================================================
+/* ==========================================================
    MOSTRAR / OCULTAR CONTRASEÑA
-   ========================================================= */
+   ========================================================== */
 
 .password-toggle {
     flex-shrink: 0;
@@ -270,18 +253,24 @@ body {
     background: rgba(0, 0, 0, 0.035);
 }
 
-.password-toggle:focus {
-    outline: none;
+.password-toggle:focus-visible {
+    outline: 2px solid #9b7a4b;
+    outline-offset: -3px;
 }
 
+/* Ocultar el ojito nativo de Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
 
-/* =========================================================
+/* ==========================================================
    BOTÓN
-   ========================================================= */
+   ========================================================== */
 
 .btn-login {
     width: 100%;
-    min-height: 54px;
+    min-height: 56px;
 
     display: flex;
     align-items: center;
@@ -296,7 +285,7 @@ body {
 
     color: #ffffff;
 
-    font-size: 0.98rem;
+    font-size: 1.05rem;
     font-weight: 600;
 
     cursor: pointer;
@@ -309,36 +298,33 @@ body {
 
 .btn-login:hover {
     background: #090b0c;
-
     transform: translateY(-1px);
 
-    box-shadow:
-        0 10px 25px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
 }
 
 .btn-login:active {
     transform: translateY(0);
 }
 
-
-/* =========================================================
+/* ==========================================================
    MENSAJE DE ACCESO
-   ========================================================= */
+   ========================================================== */
 
 .authorized-message {
     margin-top: 25px;
 
     text-align: center;
 
-    font-size: 0.78rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
 
-    color: #7b7b7b;
+    color: #555555;
 }
 
-
-/* =========================================================
+/* ==========================================================
    ERROR DE AUTENTICACIÓN
-   ========================================================= */
+   ========================================================== */
 
 .alert-danger {
     margin-bottom: 20px;
@@ -346,13 +332,12 @@ body {
     border: none;
     border-radius: 10px;
 
-    font-size: 0.88rem;
+    font-size: 1rem;
 }
 
-
-/* =========================================================
+/* ==========================================================
    RESPONSIVE
-   ========================================================= */
+   ========================================================== */
 
 @media (max-width: 991.98px) {
 
@@ -365,26 +350,39 @@ body {
     }
 
     .login-card {
-        max-width: 430px;
+        max-width: 500px;
     }
 }
 
-
 @media (max-width: 575.98px) {
+
+    .system-information {
+        padding: 0 20px;
+    }
+
+    .system-description {
+        font-size: 1rem;
+    }
 
     .login-card {
         width: calc(100% - 28px);
-
         padding: 35px 24px;
-
         border-radius: 18px;
     }
 
     .brand-name {
-        font-size: 1.15rem;
+        font-size: 1.5rem;
     }
 
     .login-title {
-        font-size: 1.75rem;
+        font-size: 1.9rem;
+    }
+
+    .login-subtitle {
+        font-size: 1rem;
+    }
+
+    .authorized-message {
+        font-size: 0.85rem;
     }
 }

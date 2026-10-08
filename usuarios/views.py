@@ -1,7 +1,16 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 
-from .models import RolPermiso
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+
+
+def entrada(request):
+    """
+    Redirige al usuario desde la URL principal.
+    """
+    if request.user.is_authenticated:
+        return redirect('usuarios:inicio')
+
+    return redirect('usuarios:login')
 
 
 @login_required

@@ -155,3 +155,28 @@ AUTH_USER_MODEL = 'usuarios.Usuario'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/inicio/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+# ==========================================================
+# CONFIGURACIÓN DE AUTENTICACIÓN
+# ==========================================================
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/inicio/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+
+# ==========================================================
+# SEGURIDAD DE SESIONES
+# ==========================================================
+
+# La cookie de sesión caduca al cerrar el navegador.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Tiempo máximo de inactividad: 30 minutos.
+SESSION_COOKIE_AGE = 1800
+
+# No renovar automáticamente la caducidad
+# en cada petición.
+SESSION_SAVE_EVERY_REQUEST = False
+

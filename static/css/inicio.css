@@ -1199,3 +1199,220 @@ a {
         height: 34px;
     }
 }
+
+
+/* ==========================================================
+   CORRECCIONES FINALES DEL DASHBOARD
+   Sidebar, distribución y legibilidad
+   ========================================================== */
+
+/* Evitar desplazamientos horizontales */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Distribución general */
+.dashboard-layout {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Sidebar fijo */
+.sidebar {
+    width: 270px;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    transition: width 0.3s ease;
+}
+
+/* Evitar barras horizontales en el menú */
+.sidebar-navigation {
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.sidebar-header,
+.sidebar-footer {
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+/* Contenido principal */
+.main-content {
+    width: calc(100% - 270px);
+    min-width: 0;
+    max-width: none;
+    margin-left: 270px;
+    transition:
+        margin-left 0.3s ease,
+        width 0.3s ease;
+}
+
+/* ==========================================================
+   SIDEBAR CONTRAÍDO
+   ========================================================== */
+
+.dashboard-layout.sidebar-collapsed .sidebar {
+    width: 72px !important;
+    min-width: 0 !important;
+}
+
+.dashboard-layout.sidebar-collapsed .main-content {
+    width: calc(100% - 72px) !important;
+    margin-left: 72px !important;
+}
+
+/* Centrar los iconos */
+.dashboard-layout.sidebar-collapsed .nav-item {
+    width: 46px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px 0;
+    justify-content: center;
+    gap: 0;
+}
+
+/* Ocultar textos del menú contraído */
+.dashboard-layout.sidebar-collapsed .nav-item span,
+.dashboard-layout.sidebar-collapsed .nav-section-title,
+.dashboard-layout.sidebar-collapsed .brand-location,
+.dashboard-layout.sidebar-collapsed .system-name,
+.dashboard-layout.sidebar-collapsed .footer-accent {
+    display: none !important;
+}
+
+/* ==========================================================
+   LETRAS MÁS GRANDES
+   ========================================================== */
+
+/* Navegación lateral */
+.nav-item {
+    font-size: 0.95rem;
+}
+
+.nav-section-title {
+    font-size: 0.72rem;
+}
+
+/* Encabezado */
+.page-title {
+    font-size: 1.55rem;
+}
+
+.user-name {
+    font-size: 1rem;
+}
+
+.user-role {
+    font-size: 0.82rem;
+}
+
+.user-area {
+    font-size: 0.78rem;
+}
+
+/* Bienvenida */
+.welcome-label {
+    font-size: 0.78rem;
+}
+
+.welcome-section h1 {
+    font-size: 2.6rem;
+}
+
+.welcome-text {
+    font-size: 1.05rem;
+}
+
+/* Título de módulos */
+.section-header h3 {
+    font-size: 1.8rem;
+}
+
+.section-header p {
+    font-size: 0.95rem;
+}
+
+/* Tarjetas */
+.module-content h4 {
+    font-size: 1.15rem;
+    line-height: 1.4;
+}
+
+.module-content p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+/* Menú del usuario */
+.dropdown-user-name {
+    font-size: 0.95rem;
+}
+
+.dropdown-user-role,
+.dropdown-user-area {
+    font-size: 0.82rem;
+}
+
+.logout-button {
+    font-size: 0.9rem;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 850px) {
+
+    .sidebar {
+        width: 80px;
+    }
+
+    .main-content {
+        width: calc(100% - 80px);
+        margin-left: 80px;
+    }
+
+    .dashboard-layout.sidebar-collapsed .sidebar {
+        width: 60px !important;
+    }
+
+    .dashboard-layout.sidebar-collapsed .main-content {
+        width: calc(100% - 60px) !important;
+        margin-left: 60px !important;
+    }
+
+    .modules-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .welcome-section h1 {
+        font-size: 2rem;
+    }
+
+    .welcome-text {
+        font-size: 0.95rem;
+    }
+
+    .module-content h4 {
+        font-size: 1.05rem;
+    }
+
+    .module-content p {
+        font-size: 0.88rem;
+    }
+}
