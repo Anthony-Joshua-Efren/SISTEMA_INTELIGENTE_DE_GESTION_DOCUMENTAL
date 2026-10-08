@@ -1,0 +1,390 @@
+/* =========================================================
+   LOGIN - SISTEMA INTELIGENTE DE GESTIÓN DOCUMENTAL
+   Sofitel Mexico City Reforma
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+
+/* =========================================================
+   FONDO
+   ========================================================= */
+
+.login-page {
+    position: relative;
+    min-height: 100vh;
+
+    background-image: url("../img/login-background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow: hidden;
+}
+
+
+/* Oscurece la fotografía para mejorar la lectura */
+
+.background-overlay {
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(7, 15, 20, 0.70) 0%,
+            rgba(7, 15, 20, 0.45) 48%,
+            rgba(7, 15, 20, 0.58) 100%
+        );
+
+    z-index: 1;
+}
+
+
+/* Todo el contenido queda encima del fondo */
+
+.login-content {
+    position: relative;
+    z-index: 2;
+}
+
+
+/* =========================================================
+   INFORMACIÓN IZQUIERDA
+   ========================================================= */
+
+.system-information {
+    width: 100%;
+    max-width: 760px;
+
+    margin: 0 auto;
+    padding: 0 40px;
+
+    text-align: center;
+
+    color: #ffffff;
+
+    text-shadow:
+        0 3px 18px rgba(0, 0, 0, 0.45);
+}
+
+.hotel-name {
+    margin-bottom: 18px;
+
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.20em;
+
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.system-information h1 {
+    margin-bottom: 20px;
+
+    font-size: clamp(2.6rem, 4vw, 4.6rem);
+    line-height: 1.05;
+    font-weight: 650;
+    letter-spacing: -0.035em;
+}
+
+.system-description {
+    max-width: 610px;
+    margin: 0 auto;
+
+    font-size: 1.05rem;
+    line-height: 1.7;
+
+    color: rgba(255, 255, 255, 0.82);
+}
+
+
+/* =========================================================
+   TARJETA DEL LOGIN
+   ========================================================= */
+
+.login-card {
+    width: calc(100% - 40px);
+    max-width: 440px;
+
+    padding: 42px 38px;
+
+    background: rgba(255, 255, 255, 0.90);
+
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 22px;
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.30);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.brand-name {
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 1.35rem;
+    font-weight: 500;
+
+    letter-spacing: 0.28em;
+
+    color: #171717;
+}
+
+.login-title {
+    margin-bottom: 7px;
+
+    font-size: 2rem;
+    font-weight: 650;
+
+    color: #161616;
+}
+
+.login-subtitle {
+    margin-bottom: 0;
+
+    font-size: 0.92rem;
+
+    color: #6d6d6d;
+}
+
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+
+.input-group-custom {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: 56px;
+
+    background: rgba(255, 255, 255, 0.82);
+
+    border: 1px solid #d9d9d9;
+    border-radius: 12px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.input-group-custom:focus-within {
+    background: #ffffff;
+
+    border-color: #9b7a4b;
+
+    box-shadow:
+        0 0 0 4px rgba(155, 122, 75, 0.10);
+}
+
+.input-icon {
+    flex-shrink: 0;
+
+    margin-left: 17px;
+
+    font-size: 1.15rem;
+
+    color: #777777;
+}
+
+.login-input {
+    width: 100%;
+    height: 100%;
+
+    padding: 0 16px;
+
+    background: transparent;
+
+    border: none;
+    outline: none;
+
+    font-size: 0.98rem;
+
+    color: #202020;
+}
+
+.login-input::placeholder {
+    color: #949494;
+}
+
+.password-input {
+    padding-right: 5px;
+}
+
+
+/* =========================================================
+   MOSTRAR / OCULTAR CONTRASEÑA
+   ========================================================= */
+
+.password-toggle {
+    flex-shrink: 0;
+
+    width: 50px;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background: transparent;
+
+    border: none;
+    border-radius: 0 12px 12px 0;
+
+    color: #777777;
+
+    cursor: pointer;
+
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: #111111;
+    background: rgba(0, 0, 0, 0.035);
+}
+
+.password-toggle:focus {
+    outline: none;
+}
+
+
+/* =========================================================
+   BOTÓN
+   ========================================================= */
+
+.btn-login {
+    width: 100%;
+    min-height: 54px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 5px;
+
+    background: #171b1e;
+
+    border: none;
+    border-radius: 12px;
+
+    color: #ffffff;
+
+    font-size: 0.98rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.btn-login:hover {
+    background: #090b0c;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   MENSAJE DE ACCESO
+   ========================================================= */
+
+.authorized-message {
+    margin-top: 25px;
+
+    text-align: center;
+
+    font-size: 0.78rem;
+
+    color: #7b7b7b;
+}
+
+
+/* =========================================================
+   ERROR DE AUTENTICACIÓN
+   ========================================================= */
+
+.alert-danger {
+    margin-bottom: 20px;
+
+    border: none;
+    border-radius: 10px;
+
+    font-size: 0.88rem;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    .login-page {
+        background-position: center;
+    }
+
+    .background-overlay {
+        background: rgba(7, 15, 20, 0.55);
+    }
+
+    .login-card {
+        max-width: 430px;
+    }
+}
+
+
+@media (max-width: 575.98px) {
+
+    .login-card {
+        width: calc(100% - 28px);
+
+        padding: 35px 24px;
+
+        border-radius: 18px;
+    }
+
+    .brand-name {
+        font-size: 1.15rem;
+    }
+
+    .login-title {
+        font-size: 1.75rem;
+    }
+}

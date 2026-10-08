@@ -1,0 +1,202 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Iniciar sesión | Gestión Documental</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Estilos del login -->
+    <link
+        rel="stylesheet"
+        href="{% static 'css/login.css' %}"
+    >
+</head>
+
+<body>
+
+<main class="login-page">
+
+    <!-- Capa oscura sobre la fotografía -->
+    <div class="background-overlay"></div>
+
+    <div class="container-fluid login-content">
+
+        <div class="row min-vh-100 align-items-center">
+
+            <!-- Información del sistema -->
+            <div class="col-lg-7 d-none d-lg-flex">
+                <div class="system-information">
+
+                    <p class="hotel-name">
+                        SOFITEL MEXICO CITY REFORMA
+                    </p>
+
+                    <h1>
+                        Sistema Inteligente<br>
+                        de Gestión Documental
+                    </h1>
+
+                    <p class="system-description">
+                        Centralización, organización y control de la
+                        documentación interna del hotel.
+                    </p>
+
+                </div>
+            </div>
+
+            <!-- Login -->
+            <div class="col-12 col-lg-5 d-flex justify-content-center">
+
+                <div class="login-card">
+
+                    <div class="text-center mb-4">
+
+                        <p class="brand-name mb-2">
+                            SOFITEL
+                        </p>
+
+                        <h2 class="login-title">
+                            Bienvenido
+                        </h2>
+
+                        <p class="login-subtitle">
+                            Ingresa tus credenciales para continuar
+                        </p>
+
+                    </div>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            Usuario o contraseña incorrectos.
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+
+                        {% csrf_token %}
+
+                        {% if next %}
+                            <input
+                                type="hidden"
+                                name="next"
+                                value="{{ next }}"
+                            >
+                        {% endif %}
+
+                        <!-- Usuario -->
+                        <div class="input-group-custom mb-3">
+
+                            <i class="bi bi-person input-icon"></i>
+
+                            <input
+                                type="text"
+                                name="username"
+                                id="id_username"
+                                class="login-input"
+                                placeholder="Usuario"
+                                autocomplete="username"
+                                autofocus
+                                required
+                            >
+
+                        </div>
+
+                        <!-- Contraseña -->
+                        <div class="input-group-custom mb-4">
+
+                            <i class="bi bi-lock input-icon"></i>
+
+                            <input
+                                type="password"
+                                name="password"
+                                id="id_password"
+                                class="login-input password-input"
+                                placeholder="Contraseña"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Mostrar contraseña"
+                            >
+                                <i
+                                    class="bi bi-eye"
+                                    id="passwordIcon"
+                                ></i>
+                            </button>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn-login"
+                        >
+                            Iniciar sesión
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+
+                    </form>
+
+                    <div class="authorized-message">
+                        <i class="bi bi-shield-lock me-1"></i>
+                        Acceso exclusivo para personal autorizado
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('id_password');
+    const passwordIcon = document.getElementById('passwordIcon');
+
+    togglePassword.addEventListener('click', function () {
+
+        const passwordVisible =
+            passwordInput.getAttribute('type') === 'text';
+
+        passwordInput.setAttribute(
+            'type',
+            passwordVisible ? 'password' : 'text'
+        );
+
+        passwordIcon.classList.toggle('bi-eye');
+        passwordIcon.classList.toggle('bi-eye-slash');
+
+        togglePassword.setAttribute(
+            'aria-label',
+            passwordVisible
+                ? 'Mostrar contraseña'
+                : 'Ocultar contraseña'
+        );
+    });
+</script>
+
+</body>
+</html>

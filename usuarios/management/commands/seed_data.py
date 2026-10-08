@@ -124,6 +124,9 @@ class Command(BaseCommand):
         # =========================================================
 
         permisos = [
+            # -----------------------------------------------------
+            # Usuarios, áreas, roles y acceso
+            # -----------------------------------------------------
             (
                 "Crear usuario",
                 "usuario.crear",
@@ -145,6 +148,25 @@ class Command(BaseCommand):
                 "Desactivar el acceso de un usuario sin eliminar su historial.",
             ),
             (
+                "Administrar áreas",
+                "area.administrar",
+                "Crear, modificar y administrar las áreas del sistema.",
+            ),
+            (
+                "Administrar roles",
+                "rol.administrar",
+                "Crear, modificar y administrar los roles del sistema.",
+            ),
+            (
+                "Administrar permisos",
+                "permiso.administrar",
+                "Administrar permisos y excepciones de acceso.",
+            ),
+
+            # -----------------------------------------------------
+            # Gestión documental
+            # -----------------------------------------------------
+            (
                 "Cargar documento",
                 "documento.cargar",
                 "Registrar y cargar nuevos documentos.",
@@ -165,11 +187,6 @@ class Command(BaseCommand):
                 "Modificar los metadatos de un documento.",
             ),
             (
-                "Crear nueva versión",
-                "documento.versionar",
-                "Registrar una nueva versión de un documento.",
-            ),
-            (
                 "Archivar documento",
                 "documento.archivar",
                 "Archivar documentos que dejan de estar vigentes.",
@@ -179,25 +196,61 @@ class Command(BaseCommand):
                 "documento.eliminar",
                 "Eliminar documentos cuando el usuario tenga autorización.",
             ),
+
+            # -----------------------------------------------------
+            # Versiones y trazabilidad
+            # -----------------------------------------------------
+            (
+                "Crear nueva versión",
+                "documento.versionar",
+                "Registrar una nueva versión de un documento.",
+            ),
+            (
+                "Consultar historial de versiones",
+                "version.consultar",
+                "Consultar el historial de versiones de los documentos autorizados.",
+            ),
             (
                 "Consultar auditoría",
                 "auditoria.consultar",
-                "Consultar la bitácora y trazabilidad del sistema.",
+                "Consultar la bitácora y trazabilidad de las acciones realizadas.",
+            ),
+
+            # -----------------------------------------------------
+            # Organización, búsqueda y tipos documentales
+            # -----------------------------------------------------
+            (
+                "Administrar catálogos",
+                "catalogo.administrar",
+                "Administrar categorías, etiquetas, tipos y formatos documentales.",
+            ),
+
+            # -----------------------------------------------------
+            # Revisiones, alertas y reportes
+            # -----------------------------------------------------
+            (
+                "Gestionar revisión y vencimiento",
+                "revision.gestionar",
+                "Registrar y modificar fechas de revisión y vencimiento de documentos.",
+            ),
+            (
+                "Consultar alertas e indicadores",
+                "alerta.consultar",
+                "Consultar alertas, vencimientos e indicadores documentales autorizados.",
             ),
             (
                 "Generar reportes",
                 "reporte.generar",
                 "Generar y consultar reportes del sistema.",
             ),
+
+            # -----------------------------------------------------
+            # Funciones inteligentes
+            # -----------------------------------------------------
             (
-                "Administrar catálogos",
-                "catalogo.administrar",
-                "Administrar categorías, etiquetas, tipos y formatos.",
-            ),
-            (
-                "Administrar permisos",
-                "permiso.administrar",
-                "Administrar roles, permisos y excepciones de acceso.",
+                "Utilizar funciones inteligentes",
+                "inteligencia.utilizar",
+                "Utilizar sugerencias inteligentes de categorías y etiquetas.",
             ),
         ]
 
@@ -223,29 +276,48 @@ class Command(BaseCommand):
                 "usuario.consultar",
                 "usuario.modificar",
                 "usuario.desactivar",
+                "area.administrar",
+                "rol.administrar",
+                "permiso.administrar",
+
                 "documento.cargar",
                 "documento.consultar",
                 "documento.descargar",
                 "documento.modificar",
-                "documento.versionar",
                 "documento.archivar",
                 "documento.eliminar",
+
+                "documento.versionar",
+                "version.consultar",
                 "auditoria.consultar",
-                "reporte.generar",
+
                 "catalogo.administrar",
-                "permiso.administrar",
+
+                "revision.gestionar",
+                "alerta.consultar",
+                "reporte.generar",
+
+                "inteligencia.utilizar",
             ],
 
             "Responsable de Área": [
                 "usuario.consultar",
+
                 "documento.cargar",
                 "documento.consultar",
                 "documento.descargar",
                 "documento.modificar",
-                "documento.versionar",
                 "documento.archivar",
+
+                "documento.versionar",
+                "version.consultar",
                 "auditoria.consultar",
+
+                "revision.gestionar",
+                "alerta.consultar",
                 "reporte.generar",
+
+                "inteligencia.utilizar",
             ],
 
             "Colaborador": [
@@ -253,18 +325,28 @@ class Command(BaseCommand):
                 "documento.consultar",
                 "documento.descargar",
                 "documento.modificar",
+
                 "documento.versionar",
+                "version.consultar",
+
+                "alerta.consultar",
+
+                "inteligencia.utilizar",
             ],
 
             "Consulta": [
                 "documento.consultar",
                 "documento.descargar",
+                "version.consultar",
             ],
         }
 
         for nombre_rol, codigos in permisos_por_rol.items():
 
             rol = Rol.objects.get(nombre=nombre_rol)
+            RolPermiso.objects.filter(rol=rol).exclude(
+                permiso__codigo__in=codigos
+            ).delete()
 
             for codigo in codigos:
 

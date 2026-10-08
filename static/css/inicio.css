@@ -1,0 +1,1201 @@
+/* =========================================================
+   DASHBOARD
+   Sistema Inteligente de Gestión Documental
+   Sofitel Mexico City Reforma
+   ========================================================= */
+
+:root {
+    --green-dark: #073b31;
+    --green-deep: #052f28;
+    --green-medium: #0b4a3d;
+    --green-soft: #e9eee8;
+
+    --gold: #c6a15b;
+    --gold-dark: #a88443;
+    --gold-soft: #f3eddf;
+
+    --cream: #f8f6f1;
+    --white: #ffffff;
+
+    --text: #1f2522;
+    --text-soft: #747a76;
+
+    --border: #e7e4dc;
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    background: var(--cream);
+    color: var(--text);
+}
+
+
+a {
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   ESTRUCTURA
+   ========================================================= */
+
+.dashboard-layout {
+    min-height: 100vh;
+
+    display: flex;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: 270px;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--green-dark) 0%,
+            var(--green-deep) 100%
+        );
+
+    color: var(--white);
+
+    box-shadow:
+        5px 0 30px rgba(0, 0, 0, 0.08);
+
+    z-index: 100;
+}
+
+
+/* =========================================================
+   MARCA
+   ========================================================= */
+
+.sidebar-header {
+    padding: 31px 28px 27px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.09);
+}
+
+
+.brand {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.brand-name {
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: 1.45rem;
+
+    letter-spacing: 0.30em;
+
+    color: var(--white);
+}
+
+
+.brand-location {
+    margin-top: 7px;
+
+    font-size: 0.62rem;
+    font-weight: 600;
+
+    letter-spacing: 0.15em;
+
+    color: var(--gold);
+}
+
+
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
+
+.sidebar-navigation {
+    flex: 1;
+
+    padding: 20px 15px;
+
+    overflow-y: auto;
+}
+
+
+.nav-section-title {
+    margin: 15px 14px 10px;
+
+    font-size: 0.62rem;
+    font-weight: 700;
+
+    letter-spacing: 0.18em;
+
+    color: var(--gold);
+}
+
+
+.nav-divider {
+    height: 1px;
+
+    margin: 15px 13px;
+
+    background:
+        rgba(255, 255, 255, 0.09);
+}
+
+
+.nav-item {
+    min-height: 50px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 4px;
+    padding: 9px 14px;
+
+    border-radius: 9px;
+
+    color:
+        rgba(255, 255, 255, 0.76);
+
+    font-size: 0.84rem;
+    font-weight: 500;
+
+    line-height: 1.35;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+
+.nav-item i {
+    width: 21px;
+
+    flex-shrink: 0;
+
+    text-align: center;
+
+    font-size: 1.05rem;
+
+    color: var(--gold);
+}
+
+
+.nav-item:hover {
+    color: var(--white);
+
+    background:
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.nav-item.active {
+    position: relative;
+
+    color: var(--white);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(198, 161, 91, 0.28),
+            rgba(198, 161, 91, 0.15)
+        );
+}
+
+
+.nav-item.active::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    width: 3px;
+    height: 65%;
+
+    border-radius: 0 3px 3px 0;
+
+    background: var(--gold);
+}
+
+
+/* =========================================================
+   PIE DEL SIDEBAR
+   ========================================================= */
+
+.sidebar-footer {
+    padding: 20px 28px 25px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+.system-name {
+    font-size: 0.68rem;
+    line-height: 1.55;
+
+    color:
+        rgba(255, 255, 255, 0.48);
+}
+
+
+.footer-accent {
+    width: 35px;
+    height: 2px;
+
+    margin-top: 13px;
+
+    background: var(--gold);
+}
+
+
+/* =========================================================
+   CONTENIDO PRINCIPAL
+   ========================================================= */
+
+.main-content {
+    width: calc(100% - 270px);
+
+    min-height: 100vh;
+
+    margin-left: 270px;
+}
+
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
+
+.topbar {
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 42px;
+
+    background:
+        rgba(255, 255, 255, 0.94);
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+
+.page-title {
+    margin: 0;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+
+.user-section {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.user-information {
+    display: flex;
+    flex-direction: column;
+
+    text-align: right;
+}
+
+
+.user-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+
+.user-role {
+    margin-top: 1px;
+
+    font-size: 0.70rem;
+
+    color: var(--gold-dark);
+}
+
+
+.user-area {
+    margin-top: 1px;
+
+    font-size: 0.67rem;
+
+    color: var(--text-soft);
+}
+
+
+.user-avatar {
+    width: 43px;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--green-dark);
+
+    color: var(--white);
+
+    font-size: 1.05rem;
+
+    box-shadow:
+        0 5px 14px rgba(7, 59, 49, 0.20);
+}
+/* =========================================================
+   MENÚ DE USUARIO
+   ========================================================= */
+
+.user-menu {
+    position: relative;
+}
+
+
+.user-avatar {
+    border: none;
+    cursor: pointer;
+}
+
+
+.user-dropdown {
+    position: absolute;
+
+    top: calc(100% + 12px);
+    right: 0;
+
+    width: 225px;
+
+    padding: 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 13px;
+
+    background: var(--white);
+
+    box-shadow:
+        0 15px 35px rgba(30, 43, 37, 0.14);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-6px);
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+
+    z-index: 500;
+}
+
+
+.user-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+.dropdown-user-info {
+    display: flex;
+    flex-direction: column;
+
+    padding: 7px 9px 10px;
+}
+
+
+.dropdown-user-name {
+    font-size: 0.83rem;
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+
+.dropdown-user-role {
+    margin-top: 2px;
+
+    font-size: 0.70rem;
+
+    color: var(--gold-dark);
+}
+
+
+.dropdown-user-area {
+    margin-top: 2px;
+
+    font-size: 0.68rem;
+
+    color: var(--text-soft);
+}
+
+
+.dropdown-divider {
+    height: 1px;
+
+    margin: 3px 0 7px;
+
+    background: var(--border);
+}
+
+
+.logout-button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-size: 0.78rem;
+    font-weight: 500;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
+}
+
+
+.logout-button i {
+    color: var(--gold-dark);
+
+    font-size: 1rem;
+}
+
+
+.logout-button:hover {
+    background: var(--gold-soft);
+
+    color: var(--green-dark);
+}
+
+/* =========================================================
+   BIENVENIDA
+   ========================================================= */
+
+.welcome-section {
+    position: relative;
+
+    min-height: 220px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin: 34px 42px 31px;
+    padding: 39px 48px;
+
+    overflow: hidden;
+
+    border-radius: 18px;
+
+    background:
+        radial-gradient(
+            circle at 85% 25%,
+            rgba(198, 161, 91, 0.16),
+            transparent 25%
+        ),
+        linear-gradient(
+            120deg,
+            var(--green-deep) 0%,
+            var(--green-dark) 55%,
+            #155347 100%
+        );
+
+    color: var(--white);
+
+    box-shadow:
+        0 16px 35px rgba(5, 47, 40, 0.15);
+}
+
+
+.welcome-section::after {
+    content: "";
+
+    position: absolute;
+
+    right: -60px;
+    bottom: -110px;
+
+    width: 330px;
+    height: 330px;
+
+    border:
+        1px solid rgba(198, 161, 91, 0.17);
+
+    border-radius: 50%;
+}
+
+
+.welcome-content {
+    position: relative;
+
+    z-index: 2;
+}
+
+
+.welcome-label {
+    margin-bottom: 11px;
+
+    font-size: 0.68rem;
+    font-weight: 700;
+
+    letter-spacing: 0.20em;
+
+    color: var(--gold);
+}
+
+
+.welcome-section h1 {
+    margin: 0 0 13px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 2.45rem;
+    font-weight: 500;
+
+    letter-spacing: -0.02em;
+}
+
+
+.welcome-section h1 span {
+    color: var(--gold);
+}
+
+
+.welcome-area {
+    width: fit-content;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 12px;
+    padding: 6px 11px;
+
+    border:
+        1px solid rgba(198, 161, 91, 0.30);
+
+    border-radius: 20px;
+
+    background:
+        rgba(198, 161, 91, 0.08);
+
+    color: #e2c991;
+
+    font-size: 0.75rem;
+}
+
+
+.welcome-text {
+    max-width: 650px;
+
+    margin: 0;
+
+    font-size: 0.94rem;
+    line-height: 1.65;
+
+    color:
+        rgba(255, 255, 255, 0.74);
+}
+
+
+/* =========================================================
+   DECORACIÓN DE BIENVENIDA
+   ========================================================= */
+
+.welcome-decoration {
+    position: relative;
+
+    z-index: 2;
+
+    margin-right: 18px;
+}
+
+
+.welcome-icon {
+    width: 105px;
+    height: 105px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid rgba(198, 161, 91, 0.27);
+
+    border-radius: 22px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: var(--gold);
+
+    font-size: 3rem;
+
+    backdrop-filter: blur(6px);
+}
+
+
+/* =========================================================
+   SECCIÓN DE MÓDULOS
+   ========================================================= */
+
+.modules-section {
+    padding: 0 42px 45px;
+}
+
+
+.section-header {
+    margin-bottom: 20px;
+}
+
+
+.section-header h3 {
+    margin: 0 0 5px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 1.55rem;
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+
+.section-header p {
+    margin: 0;
+
+    font-size: 0.82rem;
+
+    color: var(--text-soft);
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.modules-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+}
+
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.module-card {
+    position: relative;
+
+    min-height: 185px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 25px;
+
+    overflow: hidden;
+
+    background:
+        rgba(255, 255, 255, 0.92);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 15px;
+
+    color: var(--text);
+
+    box-shadow:
+        0 5px 18px rgba(30, 43, 37, 0.035);
+
+    transition:
+        transform 0.22s ease,
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+}
+
+
+.module-card:hover {
+    transform: translateY(-4px);
+
+    border-color:
+        rgba(198, 161, 91, 0.50);
+
+    box-shadow:
+        0 14px 30px rgba(30, 43, 37, 0.09);
+}
+
+
+.module-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 19px;
+
+    border-radius: 11px;
+
+    background: var(--green-soft);
+
+    color: var(--green-dark);
+
+    font-size: 1.25rem;
+}
+
+
+.module-content h4 {
+    max-width: 90%;
+
+    margin: 0 0 7px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    line-height: 1.3;
+}
+
+
+.module-content p {
+    max-width: 91%;
+
+    margin: 0;
+
+    font-size: 0.78rem;
+    line-height: 1.55;
+
+    color: var(--text-soft);
+}
+
+
+.module-arrow {
+    position: absolute;
+
+    top: 27px;
+    right: 25px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--gold-soft);
+
+    color: var(--gold-dark);
+
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+
+.module-card:hover .module-arrow {
+    transform: translateX(3px);
+
+    background: #ede1c6;
+}
+
+
+.card-accent {
+    position: absolute;
+
+    left: 25px;
+    bottom: 17px;
+
+    width: 35px;
+    height: 2px;
+
+    background: var(--gold);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .modules-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+@media (max-width: 850px) {
+
+    .sidebar {
+        width: 80px;
+    }
+
+
+    .sidebar-header {
+        padding:
+            25px 8px;
+
+        text-align: center;
+    }
+
+
+    .brand-name {
+        font-size: 0.85rem;
+
+        letter-spacing: 0.12em;
+    }
+
+
+    .brand-location,
+    .nav-item span,
+    .nav-section-title,
+    .sidebar-footer {
+        display: none;
+    }
+
+
+    .nav-item {
+        justify-content: center;
+
+        padding: 0;
+    }
+
+
+    .nav-item i {
+        width: auto;
+
+        font-size: 1.2rem;
+    }
+
+
+    .main-content {
+        width:
+            calc(100% - 80px);
+
+        margin-left: 80px;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .topbar {
+        padding: 0 20px;
+    }
+
+
+    .user-information {
+        display: none;
+    }
+
+
+    .welcome-section {
+        min-height: 230px;
+
+        margin: 22px 20px;
+        padding: 30px 25px;
+    }
+
+
+    .welcome-section h1 {
+        font-size: 1.9rem;
+    }
+
+
+    .welcome-decoration {
+        display: none;
+    }
+
+
+    .modules-section {
+        padding: 0 20px 30px;
+    }
+
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================================================
+   MÓDULOS BLOQUEADOS
+   ========================================================= */
+
+.module-card-locked {
+    cursor: not-allowed;
+    opacity: 0.62;
+    background-color: #f5f4f0;
+}
+
+.module-card-locked:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.module-card-locked .module-icon {
+    background-color: #eceae4;
+    color: #8b8b85;
+}
+
+.module-card-locked .card-accent {
+    background-color: #b9b7af;
+}
+
+.module-lock {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: #eceae4;
+    color: #8b8b85;
+
+    font-size: 0.9rem;
+}
+
+
+/* =========================================================
+   OPCIONES BLOQUEADAS DEL MENÚ LATERAL
+   ========================================================= */
+
+.nav-item-locked {
+    position: relative;
+    cursor: not-allowed;
+    opacity: 0.45;
+    user-select: none;
+}
+
+.nav-item-locked:hover {
+    background: transparent;
+}
+
+.nav-lock {
+    margin-left: auto;
+    font-size: 0.68rem;
+    opacity: 0.8;
+}
+
+/* ==========================================================
+   SIDEBAR PLEGABLE
+   Sistema Inteligente de Gestión Documental - Sofitel
+   ========================================================== */
+
+/* Transiciones suaves */
+.sidebar {
+    transition: width 0.3s ease, min-width 0.3s ease;
+    overflow-x: hidden;
+}
+
+.main-content {
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    min-width: 0;
+}
+
+/* Botón del menú */
+.sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid #e5e2da;
+    border-radius: 9px;
+    background-color: #ffffff;
+    color: #064638;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+    background-color: #f2eee5;
+    border-color: #d5b16b;
+    color: #a77c32;
+}
+
+.sidebar-toggle i {
+    font-size: 19px;
+}
+
+/* ==========================================================
+   ESTADO CONTRAÍDO
+   ========================================================== */
+
+.dashboard-layout.sidebar-collapsed .sidebar {
+    width: 72px !important;
+    min-width: 72px !important;
+    flex: 0 0 72px;
+}
+
+/* Ajustar el contenido principal */
+.dashboard-layout.sidebar-collapsed .main-content {
+    margin-left: 72px !important;
+}
+
+/* Ocultar textos, pero conservar los iconos */
+.dashboard-layout.sidebar-collapsed .brand-location,
+.dashboard-layout.sidebar-collapsed .nav-item span,
+.dashboard-layout.sidebar-collapsed .nav-section-title,
+.dashboard-layout.sidebar-collapsed .system-name,
+.dashboard-layout.sidebar-collapsed .footer-accent {
+    display: none !important;
+}
+
+/* Logotipo compacto */
+.dashboard-layout.sidebar-collapsed .sidebar-header {
+    display: flex;
+    justify-content: center;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.dashboard-layout.sidebar-collapsed .brand {
+    text-align: center;
+}
+
+.dashboard-layout.sidebar-collapsed .brand-name {
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+/* Centrar los iconos del menú */
+.dashboard-layout.sidebar-collapsed .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    min-height: 44px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px 0;
+    gap: 0;
+}
+
+.dashboard-layout.sidebar-collapsed .nav-item i {
+    margin: 0;
+    font-size: 18px;
+}
+
+/* Separadores */
+.dashboard-layout.sidebar-collapsed .nav-divider {
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
+/* Pie del sidebar */
+.dashboard-layout.sidebar-collapsed .sidebar-footer {
+    min-height: 35px;
+}
+
+/* ==========================================================
+   ADAPTACIÓN RESPONSIVA
+   ========================================================== */
+
+@media (max-width: 768px) {
+    .dashboard-layout.sidebar-collapsed .sidebar {
+        width: 60px !important;
+        min-width: 60px !important;
+        flex-basis: 60px;
+    }
+
+    .dashboard-layout.sidebar-collapsed .main-content {
+        margin-left: 60px !important;
+    }
+
+    .dashboard-layout.sidebar-collapsed .nav-item {
+        width: 42px;
+    }
+
+    .sidebar-toggle {
+        width: 34px;
+        height: 34px;
+    }
+}

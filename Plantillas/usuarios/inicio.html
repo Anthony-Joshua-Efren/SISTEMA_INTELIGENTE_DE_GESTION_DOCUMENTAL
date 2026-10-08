@@ -1,0 +1,534 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Inicio | Gestión Documental</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    >
+
+    <!-- Estilos del dashboard -->
+    <link
+        rel="stylesheet"
+        href="{% static 'css/inicio.css' %}"
+    >
+</head>
+
+<body>
+
+<div class="dashboard-layout" id="dashboardLayout">
+
+    <!-- ==================================================
+         BARRA LATERAL
+         ================================================== -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="brand">
+                <span class="brand-name">SOFITEL</span>
+                <span class="brand-location">MEXICO CITY REFORMA</span>
+            </div>
+
+        </div>
+
+        <nav class="sidebar-navigation">
+
+            <a href="{% url 'usuarios:inicio' %}" class="nav-item active"
+               title="Inicio">
+                <i class="bi bi-house-door"></i>
+                <span>Inicio</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <p class="nav-section-title">
+                MÓDULOS
+            </p>
+
+            <!-- Usuarios, áreas, roles y acceso -->
+            {% if modulos.usuarios %}
+                <a href="#" class="nav-item"
+                   title="Usuarios, áreas, roles y acceso">
+                    <i class="bi bi-people"></i>
+                    <span>Usuarios, áreas,<br>roles y acceso</span>
+                </a>
+            {% endif %}
+
+            <!-- Gestión documental -->
+            {% if modulos.gestion_documental %}
+                <a href="#" class="nav-item"
+                   title="Gestión documental">
+                    <i class="bi bi-folder2-open"></i>
+                    <span>Gestión documental</span>
+                </a>
+            {% endif %}
+
+            <!-- Organización y búsqueda -->
+            {% if modulos.organizacion_busqueda %}
+                <a href="#" class="nav-item"
+                   title="Organización y búsqueda">
+                    <i class="bi bi-search"></i>
+                    <span>Organización y<br>búsqueda</span>
+                </a>
+            {% endif %}
+
+            <!-- Versiones y trazabilidad -->
+            {% if modulos.versiones %}
+                <a href="#" class="nav-item"
+                   title="Versiones y trazabilidad">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Versiones y<br>trazabilidad</span>
+                </a>
+            {% endif %}
+
+            <!-- Revisiones, alertas y reportes -->
+            {% if modulos.revisiones %}
+                <a href="#" class="nav-item"
+                   title="Revisiones, alertas y reportes">
+                    <i class="bi bi-bell"></i>
+                    <span>Revisiones, alertas<br>y reportes</span>
+                </a>
+            {% endif %}
+
+            <!-- Funciones inteligentes -->
+            {% if modulos.inteligencia %}
+                <a href="#" class="nav-item"
+                   title="Funciones inteligentes">
+                    <i class="bi bi-stars"></i>
+                    <span>Funciones inteligentes</span>
+                </a>
+            {% endif %}
+
+            <!-- Configuración -->
+            {% if modulos.configuracion %}
+                <div class="nav-divider"></div>
+
+                <a href="#" class="nav-item"
+                   title="Configuración">
+                    <i class="bi bi-gear"></i>
+                    <span>Configuración</span>
+                </a>
+            {% endif %}
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="system-name">
+                Sistema Inteligente de<br>
+                Gestión Documental
+            </div>
+
+            <div class="footer-accent"></div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ==================================================
+         CONTENIDO PRINCIPAL
+         ================================================== -->
+    <main class="main-content">
+
+        <!-- ==================================================
+             BARRA SUPERIOR
+             ================================================== -->
+        <header class="topbar">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <!-- Botón para contraer y expandir sidebar -->
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    id="sidebarToggle"
+                    aria-label="Contraer menú lateral"
+                    aria-controls="sidebar"
+                    aria-expanded="true"
+                    title="Contraer menú"
+                >
+                    <i class="bi bi-layout-sidebar-inset"
+                       id="sidebarToggleIcon"></i>
+                </button>
+
+                <h2 class="page-title">
+                    Inicio
+                </h2>
+
+            </div>
+
+            <div class="user-section">
+
+                <div class="user-information">
+
+                    <span class="user-name">
+                        {{ user.first_name|default:user.username }}
+                    </span>
+
+                    <span class="user-role">
+                        {% if user.rol %}
+                            {{ user.rol.nombre }}
+                        {% else %}
+                            Usuario del sistema
+                        {% endif %}
+                    </span>
+
+                    {% if user.area %}
+                        <span class="user-area">
+                            Área: {{ user.area.nombre }}
+                        </span>
+                    {% endif %}
+
+                </div>
+
+                <div class="user-menu">
+
+                    <button
+                        class="user-avatar"
+                        type="button"
+                        id="userMenuButton"
+                        aria-label="Abrir menú de usuario"
+                        aria-expanded="false"
+                    >
+                        <i class="bi bi-person-fill"></i>
+                    </button>
+
+                    <div class="user-dropdown" id="userDropdown">
+
+                        <div class="dropdown-user-info">
+
+                            <span class="dropdown-user-name">
+                                {{ user.first_name|default:user.username }}
+                            </span>
+
+                            <span class="dropdown-user-role">
+                                {% if user.rol %}
+                                    {{ user.rol.nombre }}
+                                {% else %}
+                                    Usuario del sistema
+                                {% endif %}
+                            </span>
+
+                            {% if user.area %}
+                                <span class="dropdown-user-area">
+                                    Área: {{ user.area.nombre }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <form method="post"
+                              action="{% url 'usuarios:logout' %}">
+                            {% csrf_token %}
+
+                            <button type="submit"
+                                    class="logout-button">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Cerrar sesión</span>
+                            </button>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ==================================================
+             BIENVENIDA
+             ================================================== -->
+        <section class="welcome-section">
+
+            <div class="welcome-content">
+
+                <p class="welcome-label">
+                    SISTEMA INTELIGENTE DE GESTIÓN DOCUMENTAL
+                </p>
+
+                <h1>
+                    Bienvenido,
+                    <span>
+                        {{ user.first_name|default:user.username }}
+                    </span>
+                </h1>
+
+                {% if user.area %}
+                    <div class="welcome-area">
+
+                        <i class="bi bi-building"></i>
+
+                        <span>
+                            Área: {{ user.area.nombre }}
+                        </span>
+
+                    </div>
+                {% endif %}
+
+                <p class="welcome-text">
+                    Centraliza, organiza y controla la documentación interna
+                    de Sofitel Mexico City Reforma.
+                </p>
+
+            </div>
+
+            <div class="welcome-decoration">
+
+                <div class="welcome-icon">
+                    <i class="bi bi-folder-check"></i>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             MÓDULOS DEL SISTEMA
+             ================================================== -->
+        <section class="modules-section">
+
+            <div class="section-header">
+
+                <h3>
+                    Módulos del sistema
+                </h3>
+
+                <p>
+                    Selecciona un módulo para comenzar.
+                </p>
+
+            </div>
+
+            <div class="modules-grid">
+
+                <!-- USUARIOS, ÁREAS, ROLES Y ACCESO -->
+                {% if modulos.usuarios %}
+
+                    <a href="#" class="module-card">
+
+                        <div class="module-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div class="module-content">
+
+                            <h4>
+                                Usuarios, áreas, roles y acceso
+                            </h4>
+
+                            <p>
+                                Administración de usuarios, áreas,
+                                roles y permisos de acceso.
+                            </p>
+
+                        </div>
+
+                        <div class="module-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <div class="card-accent"></div>
+
+                    </a>
+
+                {% endif %}
+
+
+                <!-- GESTIÓN DOCUMENTAL -->
+                {% if modulos.gestion_documental %}
+
+                    <a href="#" class="module-card">
+
+                        <div class="module-icon">
+                            <i class="bi bi-folder2-open"></i>
+                        </div>
+
+                        <div class="module-content">
+
+                            <h4>
+                                Gestión documental
+                            </h4>
+
+                            <p>
+                                Carga, consulta, descarga y administración
+                                de documentos internos.
+                            </p>
+
+                        </div>
+
+                        <div class="module-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <div class="card-accent"></div>
+
+                    </a>
+
+                {% endif %}
+
+
+                <!-- ORGANIZACIÓN, BÚSQUEDA Y TIPOS DOCUMENTALES -->
+                {% if modulos.organizacion_busqueda %}
+
+                    <a href="#" class="module-card">
+
+                        <div class="module-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+
+                        <div class="module-content">
+
+                            <h4>
+                                Organización, búsqueda y tipos documentales
+                            </h4>
+
+                            <p>
+                                Categorías, etiquetas, búsquedas, filtros
+                                y tipos de documentos.
+                            </p>
+
+                        </div>
+
+                        <div class="module-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <div class="card-accent"></div>
+
+                    </a>
+
+                {% endif %}
+
+
+                <!-- VERSIONES Y TRAZABILIDAD -->
+                {% if modulos.versiones %}
+
+                    <a href="#" class="module-card">
+
+                        <div class="module-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+
+                        <div class="module-content">
+
+                            <h4>
+                                Versiones y trazabilidad
+                            </h4>
+
+                            <p>
+                                Control de versiones e historial de actividad
+                                sobre los documentos.
+                            </p>
+
+                        </div>
+
+                        <div class="module-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <div class="card-accent"></div>
+
+                    </a>
+
+                {% endif %}
+
+
+                <!-- REVISIONES, ALERTAS Y REPORTES -->
+                {% if modulos.revisiones %}
+
+                    <a href="#" class="module-card">
+
+                        <div class="module-icon">
+                            <i class="bi bi-bell"></i>
+                        </div>
+
+                        <div class="module-content">
+
+                            <h4>
+                                Revisiones, alertas y reportes
+                            </h4>
+
+                            <p>
+                                Seguimiento de revisiones, vencimientos,
+                                avisos e indicadores documentales.
+                            </p>
+
+                        </div>
+
+                        <div class="module-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <div class="card-accent"></div>
+
+                    </a>
+
+                {% endif %}
+
+
+                <!-- FUNCIONES INTELIGENTES -->
+                {% if modulos.inteligencia %}
+
+                    <a href="#" class="module-card">
+
+                        <div class="module-icon">
+                            <i class="bi bi-stars"></i>
+                        </div>
+
+                        <div class="module-content">
+
+                            <h4>
+                                Funciones inteligentes
+                            </h4>
+
+                            <p>
+                                Sugerencias informativas para apoyar
+                                la clasificación de documentos.
+                            </p>
+
+                        </div>
+
+                        <div class="module-arrow">
+                            <i class="bi bi-arrow-right"></i>
+                        </div>
+
+                        <div class="card-accent"></div>
+
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- JavaScript del dashboard -->
+<script src="{% static 'js/inicio.js' %}"></script>
+
+</body>
+</html>
