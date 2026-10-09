@@ -1,0 +1,1234 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Usuarios y Roles | Sofitel</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Estilos originales del módulo -->
+    <link
+        rel="stylesheet"
+        href="{% static 'css/gestion_usuarios.css' %}"
+    >
+
+    <style>
+        /* Mensajes de operaciones */
+        .operation-messages {
+            margin-bottom: 22px;
+        }
+
+        /* Botones deshabilitados */
+        .btn-new-user:disabled,
+        .action-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* Botón de reactivación */
+        .action-btn.reactivate {
+            color: #087f5b;
+        }
+
+        .action-btn.reactivate:hover {
+            background: #e6f6ee;
+        }
+
+        /* Ventana de confirmación */
+        .confirmation-modal .modal-content {
+            border: none;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .confirmation-modal .modal-header {
+            border-bottom: 1px solid #eee9e0;
+            padding: 24px;
+        }
+
+        .confirmation-modal .modal-body {
+            padding: 24px;
+            font-size: 1rem;
+            color: #45515a;
+        }
+
+        .confirmation-modal .modal-footer {
+            border-top: 1px solid #eee9e0;
+            padding: 18px 24px;
+        }
+
+        .confirmation-modal .modal-title {
+            font-family: Georgia, "Times New Roman", serif;
+            font-weight: 700;
+            color: #172b26;
+        }
+
+        .btn-confirm-action {
+            background: #063b31;
+            color: #ffffff;
+            border: none;
+            border-radius: 9px;
+            padding: 10px 22px;
+        }
+
+        .btn-confirm-action:hover {
+            background: #052d26;
+            color: #ffffff;
+        }
+
+        .btn-confirm-action.deactivate {
+            background: #b42318;
+        }
+
+        .btn-confirm-action.deactivate:hover {
+            background: #912018;
+        }
+
+        /* Tarjetas desplegables de roles */
+        .role-card { display: block; min-width: 0; padding: 0; overflow: hidden; }
+        .role-card-header { width: 100%; display: flex; align-items: center; gap: 14px; padding: 20px; border: 0; background: transparent; text-align: left; cursor: pointer; color: #172b26; }
+        .role-card-header:hover { background: #faf8f4; }
+        .role-card-summary { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+        .role-card-summary strong { font-size: 1rem; }
+        .role-card-summary small { font-size: .85rem; }
+        .role-chevron { color: #a47c3b; transition: transform .2s; }
+        .role-card-header[aria-expanded="true"] .role-chevron { transform: rotate(180deg); }
+        .role-card-details { padding: 0 20px 20px; border-top: 1px solid #eee9e0; }
+        .role-card-details p { margin: 16px 0; color: #52616a; line-height: 1.6; font-size: .92rem; }
+        .role-control { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: .9rem; font-weight: 600; }
+        .role-state-button { display: inline-flex; align-items: center; gap: 9px; border: 0; background: transparent; color: #69747c; font-size: .9rem; }
+        .role-switch-track { display: inline-flex; align-items: center; width: 43px; height: 24px; padding: 3px; border-radius: 20px; background: #adb5bd; transition: background .2s; }
+        .role-switch-thumb { display: block; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform .2s; }
+        .role-state-button.is-active .role-switch-track { background: #087f5b; }
+        .role-state-button.is-active .role-switch-thumb { transform: translateX(19px); }
+        .role-state-button:focus-visible, .role-card-header:focus-visible { outline: 3px solid #c59b4b; outline-offset: -3px; }
+        .role-protected { font-size: .87rem; color: #7b6a50; }
+        .area-card { align-items: flex-start; }
+        .area-card-content { flex: 1; min-width: 0; }
+        .area-card-content h3 { overflow-wrap: anywhere; }
+        .area-control { margin-top: 12px; }
+        .area-control .role-state-button { cursor: pointer; padding: 3px 0; }
+    </style>
+</head>
+
+<body>
+
+<div class="app-layout" id="appLayout">
+
+    <!-- SIDEBAR COMPARTIDO -->
+    {% include 'usuarios/sidebar.html' %}
+
+    <!-- ÁREA PRINCIPAL -->
+    <div class="main-area">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    id="sidebarToggle"
+                    aria-label="Contraer o expandir menú"
+                    aria-expanded="true"
+                >
+                    <i class="bi bi-layout-sidebar-inset"></i>
+                </button>
+
+                <span class="topbar-title">
+                    Usuarios y Roles
+                </span>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="topbar-user">
+
+                    <strong>
+                        {{ user.first_name|default:user.username }}
+                    </strong>
+
+                    <small>
+                        {% if user.rol %}
+                            {{ user.rol.nombre }}
+                        {% else %}
+                            Sin rol asignado
+                        {% endif %}
+                    </small>
+
+                </div>
+
+                <!-- Menú de usuario -->
+                <div class="dropdown">
+
+                    <button
+                        class="user-avatar"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Menú de usuario"
+                    >
+                        <i class="bi bi-person-fill"></i>
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                        <div class="px-3 py-2">
+
+                            <strong>
+                                {{ user.username }}
+                            </strong>
+
+                            <div class="text-secondary small">
+                                {{ user.email }}
+                            </div>
+
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <form
+                            method="post"
+                            action="{% url 'usuarios:logout' %}"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                class="dropdown-item text-danger"
+                                type="submit"
+                            >
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Cerrar sesión
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- CONTENIDO DEL MÓDULO -->
+        <main class="module-content">
+
+            <!-- Encabezado -->
+            <div class="module-heading">
+
+                <div>
+
+                    <div class="module-eyebrow">
+                        ADMINISTRACIÓN DEL SISTEMA
+                    </div>
+
+                    <h1>
+                        Usuarios y Roles
+                    </h1>
+
+                    <p>
+                        Gestiona los usuarios del sistema,
+                        sus áreas, roles y permisos de acceso.
+                    </p>
+
+                </div>
+
+                <!-- Visible solo para Administrador en la pestaña Usuarios -->
+                {% if user.rol.nombre == 'Administrador' and 'usuario.crear' in permisos_usuario %}
+                    <a href="{% url 'usuarios:crear_usuario' %}"
+                       class="btn-new-user" id="botonNuevoUsuario"
+                       style="text-decoration: none;">
+                        <i class="bi bi-plus-lg"></i> Nuevo usuario
+                    </a>
+                {% endif %}
+
+            </div>
+
+            <!-- MENSAJES -->
+            {% if messages %}
+
+                <div class="operation-messages">
+
+                    {% for message in messages %}
+
+                        <div
+                            class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                            role="alert"
+                        >
+                            {{ message }}
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Cerrar"
+                            ></button>
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+            <!-- PANEL DE ADMINISTRACIÓN -->
+            <section class="management-panel">
+
+                <!-- Pestañas -->
+                <div class="module-tabs" role="tablist">
+
+                    <button
+                        class="module-tab active"
+                        type="button"
+                        data-tab="usuarios"
+                    >
+                        <i class="bi bi-people"></i>
+                        Usuarios
+                    </button>
+
+                    <button
+                        class="module-tab"
+                        type="button"
+                        data-tab="areas"
+                    >
+                        <i class="bi bi-building"></i>
+                        Áreas
+                    </button>
+
+                    <button
+                        class="module-tab"
+                        type="button"
+                        data-tab="roles"
+                    >
+                        <i class="bi bi-shield-check"></i>
+                        Roles
+                    </button>
+
+                    {% if user.rol.nombre == 'Administrador' %}
+                    <button
+                        class="module-tab"
+                        type="button"
+                        data-tab="permisos"
+                    >
+                        <i class="bi bi-key"></i>
+                        Permisos
+                    </button>
+                    {% endif %}
+
+                </div>
+
+                <!-- ==========================================
+                     PESTAÑA USUARIOS
+                     ========================================== -->
+                <div
+                    class="tab-panel active"
+                    id="panel-usuarios"
+                >
+
+                    <!-- Filtros -->
+                    <div class="filter-bar">
+
+                        <div class="search-box">
+
+                            <i class="bi bi-search"></i>
+
+                            <input
+                                type="search"
+                                id="buscarUsuario"
+                                placeholder="Buscar por nombre, usuario, correo o área..."
+                                aria-label="Buscar usuarios"
+                            >
+
+                        </div>
+
+                        <!-- Filtro de área -->
+                        <select
+                            id="filtroArea"
+                            aria-label="Filtrar por área"
+                        >
+
+                            <option value="">
+                                Todas las áreas
+                            </option>
+
+                            {% for area in areas %}
+
+                                <option value="{{ area.nombre }}">
+                                    {{ area.nombre }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <!-- Filtro de rol -->
+                        <select
+                            id="filtroRol"
+                            aria-label="Filtrar por rol"
+                        >
+
+                            <option value="">
+                                Todos los roles
+                            </option>
+
+                            {% for rol in roles %}
+
+                                <option value="{{ rol.nombre }}">
+                                    {{ rol.nombre }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <!-- Filtro de estado -->
+                        <select
+                            id="filtroEstado"
+                            aria-label="Filtrar por estado"
+                        >
+
+                            <option value="">
+                                Todos los estados
+                            </option>
+
+                            <option value="activo">
+                                Activos
+                            </option>
+
+                            <option value="inactivo">
+                                Inactivos
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- TABLA -->
+                    <div class="table-container">
+
+                        <table
+                            class="users-table"
+                            id="tablaUsuarios"
+                        >
+
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Nombre completo</th>
+                                    <th>Correo</th>
+                                    <th>Área</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Último acceso</th>
+                                    {% if user.rol.nombre == 'Administrador' %}<th>Acciones</th>{% endif %}
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for usuario in usuarios %}
+
+                                    <tr
+                                        data-area="{{ usuario.area.nombre|default:'' }}"
+                                        data-rol="{{ usuario.rol.nombre|default:'' }}"
+                                        data-estado="{% if usuario.is_active %}activo{% else %}inactivo{% endif %}"
+                                    >
+
+                                        <!-- ID -->
+                                        <td>
+                                            {{ usuario.pk }}
+                                        </td>
+
+                                        <!-- Usuario -->
+                                        <td>
+
+                                            <div class="user-cell">
+
+                                                <div class="table-avatar">
+                                                    {{ usuario.username|slice:":1"|upper }}
+                                                </div>
+
+                                                <strong>
+                                                    {{ usuario.username }}
+                                                </strong>
+
+                                            </div>
+
+                                        </td>
+
+                                        <!-- Nombre completo -->
+                                        <td>
+                                            {{ usuario.get_full_name|default:"Sin nombre" }}
+                                        </td>
+
+                                        <!-- Correo -->
+                                        <td>
+                                            {{ usuario.email|default:"Sin correo" }}
+                                        </td>
+
+                                        <!-- Área -->
+                                        <td>
+                                            {{ usuario.area.nombre|default:"Sin área" }}
+                                        </td>
+
+                                        <!-- Rol -->
+                                        <td>
+
+                                            <span class="role-pill">
+                                                {{ usuario.rol.nombre|default:"Sin rol" }}
+                                            </span>
+
+                                        </td>
+
+                                        <!-- Estado -->
+                                        <td>
+
+                                            {% if usuario.is_active %}
+
+                                                <span class="status-pill active-status">
+                                                    Activo
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="status-pill inactive-status">
+                                                    Inactivo
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        <!-- Último acceso -->
+                                        <td>
+
+                                            {% if usuario.last_login %}
+
+                                                {{ usuario.last_login|date:"d/m/Y H:i" }}
+
+                                            {% else %}
+
+                                                Nunca
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        {% if user.rol.nombre == 'Administrador' %}
+                                        <!-- ACCIONES -->
+                                        <td>
+
+                                            <div class="action-group">
+
+                                                <!-- EDITAR -->
+                                                {% if 'usuario.modificar' in permisos_usuario %}
+
+                                                    <a
+                                                        href="{% url 'usuarios:editar_usuario' usuario.pk %}"
+                                                        class="action-btn"
+                                                        title="Editar usuario"
+                                                        aria-label="Editar {{ usuario.username }}"
+                                                        style="text-decoration: none;"
+                                                    >
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+
+                                                {% else %}
+
+                                                    <button
+                                                        type="button"
+                                                        class="action-btn"
+                                                        disabled
+                                                        title="Sin permiso para editar"
+                                                    >
+                                                        <i class="bi bi-lock"></i>
+                                                    </button>
+
+                                                {% endif %}
+
+                                                <!-- DESACTIVAR / REACTIVAR -->
+                                                {% if 'usuario.desactivar' in permisos_usuario %}
+
+                                                    {% if usuario.is_active %}
+
+                                                        {% if usuario.pk == user.pk %}
+
+                                                            <button
+                                                                type="button"
+                                                                class="action-btn"
+                                                                disabled
+                                                                title="No puedes desactivar tu propia cuenta"
+                                                            >
+                                                                <i class="bi bi-shield-lock"></i>
+                                                            </button>
+
+                                                        {% else %}
+
+                                                            <button
+                                                                type="button"
+                                                                class="action-btn danger"
+                                                                title="Desactivar usuario"
+                                                                aria-label="Desactivar {{ usuario.username }}"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#confirmacionEstado"
+                                                                data-usuario="{{ usuario.username }}"
+                                                                data-accion="desactivar"
+                                                                data-url="{% url 'usuarios:desactivar_usuario' usuario.pk %}"
+                                                            >
+                                                                <i class="bi bi-person-x"></i>
+                                                            </button>
+
+                                                        {% endif %}
+
+                                                    {% else %}
+
+                                                        <button
+                                                            type="button"
+                                                            class="action-btn reactivate"
+                                                            title="Reactivar usuario"
+                                                            aria-label="Reactivar {{ usuario.username }}"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#confirmacionEstado"
+                                                            data-usuario="{{ usuario.username }}"
+                                                            data-accion="reactivar"
+                                                            data-url="{% url 'usuarios:reactivar_usuario' usuario.pk %}"
+                                                        >
+                                                            <i class="bi bi-person-check"></i>
+                                                        </button>
+
+                                                    {% endif %}
+
+                                                {% else %}
+
+                                                    <button
+                                                        type="button"
+                                                        class="action-btn"
+                                                        disabled
+                                                        title="Sin permiso para cambiar el estado"
+                                                    >
+                                                        <i class="bi bi-lock"></i>
+                                                    </button>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        </td>
+                                        {% endif %}
+
+                                    </tr>
+
+                                {% empty %}
+
+                                    <tr>
+                                        <td
+                                            colspan="{% if user.rol.nombre == 'Administrador' %}9{% else %}8{% endif %}"
+                                            class="empty-table"
+                                        >
+                                            No hay usuarios registrados.
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <!-- Pie de tabla -->
+                    <div class="table-footer">
+
+                        <span id="contadorUsuarios">
+                            Usuarios registrados: {{ usuarios|length }}
+                        </span>
+
+                        <span>
+                            Datos del sistema
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- ==========================================
+                     PESTAÑA ÁREAS
+                     ========================================== -->
+                <div class="tab-panel" id="panel-areas">
+                    <div class="panel-inner">
+                        <div class="inner-heading">
+                            <h2>Áreas del hotel</h2>
+                            <p>Áreas registradas para la organización y asignación de usuarios.</p>
+                        </div>
+                        <div class="info-grid">
+                            {% for area in areas %}
+                            <div class="info-card area-card">
+                                <div class="info-icon"><i class="bi bi-building"></i></div>
+                                <div class="area-card-content">
+                                    <h3>{{ area.nombre }}</h3>
+                                    <span class="{% if area.estado %}text-success{% else %}text-danger{% endif %}">
+                                        {% if area.estado %}Área activa{% else %}Área inactiva{% endif %}
+                                    </span>
+                                    {% if user.rol.nombre == 'Administrador' and 'area.administrar' in permisos_usuario %}
+                                    <div class="area-control">
+                                        <button type="button"
+                                                class="role-state-button {% if area.estado %}is-active{% endif %}"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#confirmacionArea"
+                                                data-area="{{ area.nombre }}"
+                                                data-accion="{% if area.estado %}desactivar{% else %}activar{% endif %}"
+                                                data-url="{% url 'usuarios:cambiar_estado_area' area.pk %}"
+                                                aria-label="{% if area.estado %}Desactivar{% else %}Activar{% endif %} área {{ area.nombre }}">
+                                            <span class="role-switch-track"><span class="role-switch-thumb"></span></span>
+                                            <span>{% if area.estado %}Activo{% else %}Inactivo{% endif %}</span>
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p>No hay áreas registradas.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     PESTAÑA ROLES
+                     ========================================== -->
+                <div class="tab-panel" id="panel-roles">
+                    <div class="panel-inner">
+                        <div class="inner-heading">
+                            <h2>Roles del sistema</h2>
+                            <p>Selecciona un rol para conocer sus funciones{% if user.rol.nombre == 'Administrador' %} y administrar su estado{% endif %}.</p>
+                        </div>
+                        <div class="info-grid">
+                            {% for rol in roles %}
+                            <div class="info-card role-card" data-role-card>
+                                <button type="button" class="role-card-header" aria-expanded="false"
+                                        aria-controls="detalle-rol-{{ rol.pk }}">
+                                    <span class="info-icon"><i class="bi bi-shield-check"></i></span>
+                                    <span class="role-card-summary">
+                                        <strong>{{ rol.nombre }}</strong>
+                                        <small class="{% if rol.estado %}text-success{% else %}text-danger{% endif %}">
+                                            {% if rol.estado %}Rol activo{% else %}Rol inactivo{% endif %}
+                                        </small>
+                                    </span>
+                                    <i class="bi bi-chevron-down role-chevron"></i>
+                                </button>
+                                <div class="role-card-details" id="detalle-rol-{{ rol.pk }}" hidden>
+                                    <p>
+                                        {% if rol.nombre == 'Administrador' %}
+                                            Administra la configuración, usuarios, roles y operaciones del sistema de acuerdo con los permisos asignados.
+                                        {% elif rol.nombre == 'Responsable de Área' %}
+                                            Supervisa la gestión documental de su área y las operaciones autorizadas para su rol.
+                                        {% elif rol.nombre == 'Colaborador' %}
+                                            Trabaja con documentos y realiza las operaciones permitidas por su rol.
+                                        {% elif rol.nombre == 'Consulta' %}
+                                            Consulta y busca información documental conforme a los permisos otorgados.
+                                        {% else %}
+                                            {{ rol.descripcion|default:'Rol del sistema. Sus funciones dependen de los permisos asignados.' }}
+                                        {% endif %}
+                                    </p>
+                                    {% if rol.nombre == 'Administrador' %}
+                                        <div class="role-protected"><i class="bi bi-shield-lock"></i> Rol protegido: no se puede desactivar.</div>
+                                    {% elif user.rol.nombre == 'Administrador' and 'rol.administrar' in permisos_usuario %}
+                                        <div class="role-control">
+                                            <span>Estado del rol</span>
+                                            <button type="button" class="role-state-button {% if rol.estado %}is-active{% endif %}"
+                                                    data-bs-toggle="modal" data-bs-target="#confirmacionRol"
+                                                    data-rol="{{ rol.nombre }}"
+                                                    data-accion="{% if rol.estado %}desactivar{% else %}activar{% endif %}"
+                                                    data-url="{% url 'usuarios:cambiar_estado_rol' rol.pk %}"
+                                                    aria-label="{% if rol.estado %}Desactivar{% else %}Activar{% endif %} rol {{ rol.nombre }}">
+                                                <span class="role-switch-track"><span class="role-switch-thumb"></span></span>
+                                                <span>{% if rol.estado %}Activo{% else %}Inactivo{% endif %}</span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                                <p>No hay roles registrados.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==========================================
+                     PESTAÑA PERMISOS
+                     ========================================== -->
+                {% if user.rol.nombre == 'Administrador' %}
+                <div
+                    class="tab-panel"
+                    id="panel-permisos"
+                >
+
+                    <div class="panel-inner">
+
+                        <div class="inner-heading">
+
+                            <h2>
+                                Permisos de acceso
+                            </h2>
+
+                            <p>
+                                Administración de las autorizaciones
+                                asignadas a los roles.
+                            </p>
+
+                        </div>
+
+                        <div class="pending-feature">
+
+                            <i class="bi bi-shield-lock"></i>
+
+                            <h3>
+                                Configuración de permisos
+                            </h3>
+
+                            <p>
+                                En la siguiente etapa conectaremos
+                                la administración de permisos por rol.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+<!-- ==========================================
+     MODAL DE CONFIRMACIÓN
+     ========================================== -->
+<div
+    class="modal fade confirmation-modal"
+    id="confirmacionEstado"
+    tabindex="-1"
+    aria-labelledby="tituloConfirmacion"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title"
+                    id="tituloConfirmacion"
+                >
+                    Confirmar operación
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p id="mensajeConfirmacion" class="mb-2"></p>
+
+                <p class="text-secondary small mb-0">
+                    Esta operación no eliminará al usuario ni sus
+                    registros del sistema.
+                </p>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Cancelar
+                </button>
+
+                <form
+                    method="post"
+                    id="formularioEstado"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn-confirm-action"
+                        id="botonConfirmarEstado"
+                    >
+                        Confirmar
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% if user.rol.nombre == 'Administrador' %}
+<!-- Confirmación para activar o desactivar roles -->
+<div class="modal fade confirmation-modal" id="confirmacionRol" tabindex="-1" aria-labelledby="tituloConfirmacionRol" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloConfirmacionRol">Confirmar cambio de rol</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeConfirmacionRol" class="mb-2"></p>
+                <p class="small text-secondary mb-0">Los usuarios que tengan asignado este rol podrían perder o recuperar acceso a sus funciones.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="formularioEstadoRol">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-confirm-action" id="botonConfirmarRol">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% if user.rol.nombre == 'Administrador' and 'area.administrar' in permisos_usuario %}
+<!-- Confirmación para activar o desactivar áreas -->
+<div class="modal fade confirmation-modal" id="confirmacionArea" tabindex="-1"
+     aria-labelledby="tituloConfirmacionArea" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloConfirmacionArea">Cambiar estado del área</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p id="mensajeConfirmacionArea" class="mb-2"></p>
+                <p class="small text-secondary mb-0">El área permanecerá registrada en el sistema.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="formularioEstadoArea">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-confirm-action" id="botonConfirmarArea">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ==========================================================
+    // SIDEBAR PLEGABLE
+    // ==========================================================
+
+    const layout = document.getElementById("appLayout");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+
+    if (layout && sidebarToggle) {
+
+        sidebarToggle.addEventListener("click", function () {
+
+            layout.classList.toggle("sidebar-collapsed");
+
+            const collapsed = layout.classList.contains(
+                "sidebar-collapsed"
+            );
+
+            sidebarToggle.setAttribute(
+                "aria-expanded",
+                String(!collapsed)
+            );
+
+        });
+
+    }
+
+
+    // ==========================================================
+    // CAMBIO DE PESTAÑAS
+    // ==========================================================
+
+    const tabButtons = document.querySelectorAll(".module-tab");
+    const tabPanels = document.querySelectorAll(".tab-panel");
+
+    tabButtons.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            const target = button.dataset.tab;
+
+            tabButtons.forEach(function (tab) {
+                tab.classList.remove("active");
+            });
+
+            tabPanels.forEach(function (panel) {
+                panel.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+            const nuevoUsuario = document.getElementById("botonNuevoUsuario");
+            if (nuevoUsuario) {
+                nuevoUsuario.hidden = target !== "usuarios";
+                nuevoUsuario.style.display = target === "usuarios" ? "" : "none";
+            }
+
+            const targetPanel = document.getElementById(
+                "panel-" + target
+            );
+
+            if (targetPanel) {
+                targetPanel.classList.add("active");
+            }
+
+        });
+
+    });
+
+
+    // ==========================================================
+    // FILTROS DE USUARIOS
+    // ==========================================================
+
+    const buscarUsuario = document.getElementById("buscarUsuario");
+    const filtroArea = document.getElementById("filtroArea");
+    const filtroRol = document.getElementById("filtroRol");
+    const filtroEstado = document.getElementById("filtroEstado");
+
+    function filtrarUsuarios() {
+
+        if (
+            !buscarUsuario ||
+            !filtroArea ||
+            !filtroRol ||
+            !filtroEstado
+        ) {
+            return;
+        }
+
+        const busqueda = buscarUsuario.value.toLowerCase().trim();
+        const area = filtroArea.value.toLowerCase();
+        const rol = filtroRol.value.toLowerCase();
+        const estado = filtroEstado.value.toLowerCase();
+
+        const filas = document.querySelectorAll(
+            "#tablaUsuarios tbody tr[data-area]"
+        );
+
+        let visibles = 0;
+
+        filas.forEach(function (fila) {
+
+            const texto = fila.textContent.toLowerCase();
+
+            const coincide =
+                texto.includes(busqueda) &&
+                (!area || fila.dataset.area.toLowerCase() === area) &&
+                (!rol || fila.dataset.rol.toLowerCase() === rol) &&
+                (!estado || fila.dataset.estado.toLowerCase() === estado);
+
+            fila.style.display = coincide ? "" : "none";
+
+            if (coincide) {
+                visibles++;
+            }
+
+        });
+
+        const contador = document.getElementById(
+            "contadorUsuarios"
+        );
+
+        if (contador) {
+            contador.textContent =
+                "Mostrando " + visibles +
+                " de " + filas.length +
+                " usuarios";
+        }
+
+    }
+
+    if (
+        buscarUsuario &&
+        filtroArea &&
+        filtroRol &&
+        filtroEstado
+    ) {
+
+        buscarUsuario.addEventListener("input", filtrarUsuarios);
+        filtroArea.addEventListener("change", filtrarUsuarios);
+        filtroRol.addEventListener("change", filtrarUsuarios);
+        filtroEstado.addEventListener("change", filtrarUsuarios);
+
+    }
+
+
+    // ==========================================================
+    // CONFIRMACIÓN PARA DESACTIVAR / REACTIVAR
+    // ==========================================================
+
+    const modalEstado = document.getElementById(
+        "confirmacionEstado"
+    );
+
+    if (modalEstado) {
+
+        modalEstado.addEventListener(
+            "show.bs.modal",
+            function (event) {
+
+                const boton = event.relatedTarget;
+
+                if (!boton) {
+                    return;
+                }
+
+                const usuario = boton.dataset.usuario;
+                const accion = boton.dataset.accion;
+                const url = boton.dataset.url;
+
+                const formulario = document.getElementById(
+                    "formularioEstado"
+                );
+
+                const mensaje = document.getElementById(
+                    "mensajeConfirmacion"
+                );
+
+                const titulo = document.getElementById(
+                    "tituloConfirmacion"
+                );
+
+                const confirmar = document.getElementById(
+                    "botonConfirmarEstado"
+                );
+
+                formulario.action = url;
+
+                const esDesactivacion = accion === "desactivar";
+
+                titulo.textContent = esDesactivacion
+                    ? "Desactivar usuario"
+                    : "Reactivar usuario";
+
+                mensaje.textContent = esDesactivacion
+                    ? "¿Estás seguro de que deseas desactivar al usuario " +
+                      usuario + "?"
+                    : "¿Estás seguro de que deseas reactivar al usuario " +
+                      usuario + "?";
+
+                confirmar.textContent = esDesactivacion
+                    ? "Desactivar usuario"
+                    : "Reactivar usuario";
+
+                confirmar.classList.toggle(
+                    "deactivate",
+                    esDesactivacion
+                );
+
+            }
+        );
+
+    }
+
+    // Confirmación de cambio de estado de áreas
+    const modalArea = document.getElementById("confirmacionArea");
+    if (modalArea) {
+        modalArea.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+            const accion = button.dataset.accion;
+            const area = button.dataset.area;
+            document.getElementById("formularioEstadoArea").action = button.dataset.url;
+            document.getElementById("tituloConfirmacionArea").textContent =
+                (accion === "desactivar" ? "Desactivar" : "Activar") + " área";
+            document.getElementById("mensajeConfirmacionArea").textContent =
+                "¿Estás seguro de que deseas " + accion + " el área " + area + "?";
+            const confirmar = document.getElementById("botonConfirmarArea");
+            confirmar.textContent = accion === "desactivar" ? "Desactivar área" : "Activar área";
+            confirmar.classList.toggle("deactivate", accion === "desactivar");
+        });
+    }
+
+    // Tarjetas de roles: mostrar y ocultar información
+    document.querySelectorAll(".role-card-header").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const details = document.getElementById(button.getAttribute("aria-controls"));
+            if (!details) return;
+            const open = button.getAttribute("aria-expanded") === "true";
+            button.setAttribute("aria-expanded", String(!open));
+            details.hidden = open;
+        });
+    });
+
+    // Confirmación de cambio de estado de roles
+    const modalRol = document.getElementById("confirmacionRol");
+    if (modalRol) {
+        modalRol.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+            const rol = button.dataset.rol;
+            const accion = button.dataset.accion;
+            const form = document.getElementById("formularioEstadoRol");
+            const confirm = document.getElementById("botonConfirmarRol");
+            form.action = button.dataset.url;
+            document.getElementById("tituloConfirmacionRol").textContent =
+                (accion === "desactivar" ? "Desactivar" : "Activar") + " rol";
+            document.getElementById("mensajeConfirmacionRol").textContent =
+                "¿Estás seguro de que deseas " + accion + " el rol " + rol + "?";
+            confirm.textContent = accion === "desactivar" ? "Desactivar rol" : "Activar rol";
+            confirm.classList.toggle("deactivate", accion === "desactivar");
+        });
+    }
+
+});
+</script>
+
+</body>
+</html>
