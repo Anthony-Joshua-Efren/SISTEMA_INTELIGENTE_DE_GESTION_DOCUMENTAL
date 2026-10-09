@@ -4,39 +4,103 @@ from django.urls import path
 
 from . import views
 
-app_name = 'usuarios'
+app_name = "usuarios"
 
 urlpatterns = [
-    # URL principal del sistema
+
+    # ==========================================
+    # ENTRADA PRINCIPAL
+    # ==========================================
+
     path(
-        '',
+        "",
         views.entrada,
-        name='entrada'
+        name="entrada"
     ),
 
-    # Inicio de sesión
+    # ==========================================
+    # AUTENTICACIÓN
+    # ==========================================
+
     path(
-        'login/',
+        "login/",
         auth_views.LoginView.as_view(
-            template_name='usuarios/login.html',
+            template_name="usuarios/login.html",
             redirect_authenticated_user=True
         ),
-        name='login'
+        name="login"
     ),
 
-    # Dashboard protegido
     path(
-        'inicio/',
-        views.inicio,
-        name='inicio'
-    ),
-
-    # Cierre de sesión
-    path(
-        'logout/',
+        "logout/",
         auth_views.LogoutView.as_view(
-            next_page='usuarios:login'
+            next_page="usuarios:login"
         ),
-        name='logout'
+        name="logout"
     ),
+
+    # ==========================================
+    # DASHBOARD
+    # ==========================================
+
+    path(
+        "inicio/",
+        views.inicio,
+        name="inicio"
+    ),
+
+    # ==========================================
+    # GESTIÓN DE USUARIOS
+    # ==========================================
+
+    path(
+        "usuarios/",
+        views.gestion_usuarios,
+        name="gestion_usuarios"
+    ),
+
+    path(
+        "usuarios/nuevo/",
+        views.crear_usuario,
+        name="crear_usuario"
+    ),
+
+    path(
+        "usuarios/<int:usuario_id>/editar/",
+        views.editar_usuario,
+        name="editar_usuario"
+    ),
+
+    path(
+        "usuarios/<int:usuario_id>/desactivar/",
+        views.desactivar_usuario,
+        name="desactivar_usuario"
+    ),
+
+    path(
+        "usuarios/<int:usuario_id>/reactivar/",
+        views.reactivar_usuario,
+        name="reactivar_usuario"
+    ),
+
+    # ==========================================
+    # ACTIVAR / DESACTIVAR ROLES
+    # ==========================================
+
+    path(
+        "roles/<int:rol_id>/cambiar-estado/",
+        views.cambiar_estado_rol,
+        name="cambiar_estado_rol"
+    ),
+
+    # ==========================================
+    # ACTIVAR / DESACTIVAR ÁREAS
+    # ==========================================
+
+    path(
+        "areas/<int:area_id>/cambiar-estado/",
+        views.cambiar_estado_area,
+        name="cambiar_estado_area"
+    ),
+
 ]

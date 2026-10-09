@@ -1,0 +1,81 @@
+
+<aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-brand">
+        <div class="brand-title">SOFITEL</div>
+        <div class="brand-subtitle">MEXICO CITY REFORMA</div>
+    </div>
+
+    <nav class="sidebar-nav">
+
+        <a href="{% url 'usuarios:inicio' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'inicio' %}active{% endif %}"
+           title="Inicio">
+            <i class="bi bi-house-door"></i>
+            <span>Inicio</span>
+        </a>
+
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-label">MÓDULOS</div>
+
+        {% if modulos.usuarios %}
+        <a href="{% url 'usuarios:gestion_usuarios' %}"
+           class="sidebar-link {% if request.resolver_match.url_name == 'gestion_usuarios' %}active{% endif %}"
+           title="Usuarios, áreas, roles y acceso">
+            <i class="bi bi-people"></i>
+            <span>Usuarios, áreas, roles y acceso</span>
+        </a>
+        {% endif %}
+
+        {% if modulos.gestion_documental %}
+        <a href="#" class="sidebar-link" title="Gestión documental">
+            <i class="bi bi-folder2-open"></i>
+            <span>Gestión documental</span>
+        </a>
+        {% endif %}
+
+        {% if modulos.organizacion_busqueda %}
+        <a href="#" class="sidebar-link" title="Organización y búsqueda">
+            <i class="bi bi-search"></i>
+            <span>Organización y búsqueda</span>
+        </a>
+        {% endif %}
+
+        {% if modulos.versiones %}
+        <a href="#" class="sidebar-link" title="Versiones y trazabilidad">
+            <i class="bi bi-clock-history"></i>
+            <span>Versiones y trazabilidad</span>
+        </a>
+        {% endif %}
+
+        {% if modulos.revisiones %}
+        <a href="#" class="sidebar-link" title="Revisiones, alertas y reportes">
+            <i class="bi bi-bell"></i>
+            <span>Revisiones, alertas y reportes</span>
+        </a>
+        {% endif %}
+
+        {% if modulos.inteligencia %}
+        <a href="#" class="sidebar-link" title="Funciones inteligentes">
+            <i class="bi bi-stars"></i>
+            <span>Funciones inteligentes</span>
+        </a>
+        {% endif %}
+
+        {% if modulos.configuracion %}
+        <div class="sidebar-divider"></div>
+
+        <a href="#" class="sidebar-link" title="Configuración">
+            <i class="bi bi-gear"></i>
+            <span>Configuración</span>
+        </a>
+        {% endif %}
+
+    </nav>
+
+    <div class="sidebar-bottom">
+        <span>Sistema Inteligente de Gestión Documental</span>
+        <div class="gold-line"></div>
+    </div>
+
+</aside>
