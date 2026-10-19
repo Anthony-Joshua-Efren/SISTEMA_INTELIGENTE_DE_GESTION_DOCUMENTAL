@@ -1,0 +1,438 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}{{ documento.titulo|default:"Documento" }}{% endblock %}
+
+{% block contenido %}
+
+<!-- Encabezado -->
+<div class="module-heading">
+
+    <div>
+
+        <div class="module-eyebrow">
+            GESTIÓN DOCUMENTAL
+        </div>
+
+        <h1>
+            {{ documento.titulo|default:"Documento sin título" }}
+        </h1>
+
+        <p>
+            Documento del área {{ documento.area.nombre|default:"—" }}.
+        </p>
+
+    </div>
+
+</div>
+
+<!-- Acciones -->
+<div class="doc-actions">
+
+    <a href="{% url 'documentos:lista_documentos' %}"
+       class="btn-secondary-module">
+        <i class="bi bi-arrow-left"></i> Volver al listado
+    </a>
+
+    {% if 'documento.descargar' in permisos_usuario and version %}
+        <a href="{% url 'documentos:descargar_documento' documento.pk %}"
+           class="btn-new-user"
+           style="text-decoration: none;">
+            <i class="bi bi-download"></i> Descargar
+        </a>
+    {% endif %}
+
+    {% if 'documento.descargar' in permisos_usuario and version %}
+        {% if tipo_vista_previa %}
+            <button type="button"
+                    class="btn-secondary-module"
+                    data-bs-toggle="modal"
+                    data-bs-target="#vistaPrevia">
+                <i class="bi bi-eye"></i> Vista previa
+            </button>
+        {% else %}
+            <button type="button"
+                    class="btn-secondary-module"
+                    disabled
+                    title="La vista previa solo está disponible para PDF, imágenes y texto">
+                <i class="bi bi-eye-slash"></i> Vista previa
+            </button>
+        {% endif %}
+    {% endif %}
+
+    {% if 'documento.modificar' in permisos_usuario and documento.estado %}
+        <a href="{% url 'documentos:editar_documento' documento.pk %}"
+           class="btn-secondary-module">
+            <i class="bi bi-pencil"></i> Editar datos
+        </a>
+    {% endif %}
+
+    {% if 'documento.archivar' in permisos_usuario %}
+        <button type="button"
+                class="btn-secondary-module"
+                data-bs-toggle="modal"
+                data-bs-target="#confirmacionEstado">
+            {% if documento.estado %}
+                <i class="bi bi-archive"></i> Archivar
+            {% else %}
+                <i class="bi bi-arrow-counterclockwise"></i> Reactivar
+            {% endif %}
+        </button>
+    {% endif %}
+
+</div>
+
+<div class="doc-grid">
+
+    <!-- DATOS DEL DOCUMENTO -->
+    <section class="management-panel">
+
+      <div class="panel-inner">
+
+        <div class="inner-heading">
+            <h2>Datos del documento</h2>
+        </div>
+
+        <dl class="doc-fields">
+
+            <div class="doc-field doc-field-wide">
+                <dt>Descripción</dt>
+                <dd>{{ documento.descripcion|default:"—"|linebreaksbr }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Área</dt>
+                <dd>{{ documento.area.nombre|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Departamento</dt>
+                <dd>{{ documento.departamento|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Categoría</dt>
+                <dd>{{ documento.categoria.nombre|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Tipo de documento</dt>
+                <dd>{{ documento.tipo_documento.nombre|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Responsable</dt>
+                <dd>
+                    {% if documento.usuario_responsable %}
+                        {{ documento.usuario_responsable.get_full_name|default:documento.usuario_responsable.username }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Proveedor</dt>
+                <dd>{{ documento.proveedor|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Sistema relacionado</dt>
+                <dd>{{ documento.sistema_relacionado|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Estado</dt>
+                <dd>
+                    {% if documento.estado %}
+                        <span class="status-pill active-status">Activo</span>
+                    {% else %}
+                        <span class="status-pill inactive-status">Archivado</span>
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Fecha del documento</dt>
+                <dd>{{ documento.fecha_documento|date:"d/m/Y"|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Fecha de carga</dt>
+                <dd>
+                    {% if documento.fecha_carga %}
+                        {{ documento.fecha_carga|hora_local|date:"d/m/Y H:i" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Fecha de revisión</dt>
+                <dd>{{ documento.fecha_revision|date:"d/m/Y"|default:"—" }}</dd>
+            </div>
+
+            <div class="doc-field">
+                <dt>Fecha de vencimiento</dt>
+                <dd>{{ documento.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</dd>
+            </div>
+
+        </dl>
+
+      </div>
+
+    </section>
+
+    <!-- ARCHIVO VIGENTE -->
+    <section class="management-panel">
+
+      <div class="panel-inner">
+
+        <div class="inner-heading">
+            <h2>Archivo vigente</h2>
+        </div>
+
+        {% if version %}
+
+            <dl class="doc-fields">
+
+                <div class="doc-field">
+                    <dt>Versión</dt>
+                    <dd><span class="role-pill">v{{ version.numero_version|default:"1" }}</span></dd>
+                </div>
+
+                <div class="doc-field">
+                    <dt>Formato</dt>
+                    <dd>
+                        {% if version.formato %}
+                            <span class="format-pill">
+                                <i class="bi {{ version.formato.extension|icono_formato }}"></i>
+                                {{ version.formato.extension|etiqueta_formato }}
+                            </span>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <div class="doc-field">
+                    <dt>Subido por</dt>
+                    <dd>{{ version.usuario.get_full_name|default:version.usuario.username }}</dd>
+                </div>
+
+                <div class="doc-field">
+                    <dt>Fecha</dt>
+                    <dd>
+                        {% if version.fecha_creacion %}
+                            {{ version.fecha_creacion|hora_local|date:"d/m/Y H:i" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <div class="doc-field">
+                    <dt>Comentario</dt>
+                    <dd>{{ version.comentario_cambio|default:"—" }}</dd>
+                </div>
+
+                <div class="doc-field">
+                    <dt>Versiones registradas</dt>
+                    <dd>{{ total_versiones }}</dd>
+                </div>
+
+            </dl>
+
+        {% else %}
+
+            <p class="text-secondary mb-0">
+                Este documento todavía no tiene un archivo cargado.
+            </p>
+
+        {% endif %}
+
+      </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block modales %}
+
+{% if 'documento.archivar' in permisos_usuario %}
+
+<!-- Confirmación para archivar o reactivar -->
+<div class="modal fade confirmation-modal"
+     id="confirmacionEstado"
+     tabindex="-1"
+     aria-labelledby="tituloConfirmacion"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="tituloConfirmacion">
+                    {% if documento.estado %}Archivar documento{% else %}Reactivar documento{% endif %}
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p class="mb-2">
+                    {% if documento.estado %}
+                        ¿Estás seguro de que deseas archivar el documento
+                        «{{ documento.titulo }}»?
+                    {% else %}
+                        ¿Estás seguro de que deseas reactivar el documento
+                        «{{ documento.titulo }}»?
+                    {% endif %}
+                </p>
+
+                <p class="text-secondary small mb-0">
+                    Esta operación no elimina el documento ni su archivo;
+                    solo cambia su estado.
+                </p>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <form method="post"
+                      action="{% url 'documentos:cambiar_estado_documento' documento.pk %}">
+
+                    {% csrf_token %}
+
+                    <input type="hidden"
+                           name="accion"
+                           value="{% if documento.estado %}archivar{% else %}reactivar{% endif %}">
+
+                    <button type="submit"
+                            class="btn-confirm-action {% if documento.estado %}deactivate{% endif %}">
+                        {% if documento.estado %}Archivar{% else %}Reactivar{% endif %}
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+{% if 'documento.descargar' in permisos_usuario and tipo_vista_previa %}
+
+<!-- Vista previa del archivo -->
+<div class="modal fade confirmation-modal"
+     id="vistaPrevia"
+     tabindex="-1"
+     aria-labelledby="tituloVistaPrevia"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="tituloVistaPrevia">
+                    Vista previa: {{ documento.titulo|default:"Documento" }}
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+
+            </div>
+
+            <div class="modal-body vista-previa-cuerpo">
+
+                {% if tipo_vista_previa == 'imagen' %}
+                    <img class="vista-previa-imagen"
+                         alt="Vista previa de {{ documento.titulo }}"
+                         data-src="{% url 'documentos:vista_previa_documento' documento.pk %}">
+                {% else %}
+                    <iframe class="vista-previa-marco"
+                            title="Vista previa de {{ documento.titulo }}"
+                            data-src="{% url 'documentos:vista_previa_documento' documento.pk %}"></iframe>
+                {% endif %}
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cerrar
+                </button>
+
+                <a href="{% url 'documentos:descargar_documento' documento.pk %}"
+                   class="btn-confirm-action">
+                    <i class="bi bi-download me-1"></i> Descargar
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const ventana = document.getElementById("vistaPrevia");
+
+    if (!ventana) {
+        return;
+    }
+
+    const elemento = ventana.querySelector("[data-src]");
+
+    // El archivo se pide solo al abrir la ventana, y se libera al cerrarla.
+    ventana.addEventListener("show.bs.modal", function () {
+        elemento.setAttribute("src", elemento.dataset.src);
+    });
+
+    ventana.addEventListener("hidden.bs.modal", function () {
+        if (elemento.tagName === "IFRAME") {
+            elemento.setAttribute("src", "about:blank");
+        } else {
+            elemento.removeAttribute("src");
+        }
+    });
+
+});
+</script>
+
+{% endblock %}
