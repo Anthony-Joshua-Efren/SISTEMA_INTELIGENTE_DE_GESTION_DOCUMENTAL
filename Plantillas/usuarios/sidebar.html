@@ -1,4 +1,3 @@
-
 <aside class="sidebar" id="sidebar">
 
     <div class="sidebar-brand">
@@ -28,7 +27,9 @@
         {% endif %}
 
         {% if modulos.gestion_documental %}
-        <a href="#" class="sidebar-link" title="Gestión documental">
+        <a href="{% url 'documentos:lista_documentos' %}"
+           class="sidebar-link {% if request.resolver_match.app_name == 'documentos' %}active{% endif %}"
+           title="Gestión documental">
             <i class="bi bi-folder2-open"></i>
             <span>Gestión documental</span>
         </a>

@@ -1,0 +1,225 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}Gestión documental{% endblock %}
+
+{% block contenido %}
+
+<!-- Encabezado -->
+<div class="module-heading">
+
+    <div>
+
+        <div class="module-eyebrow">
+            GESTIÓN DOCUMENTAL
+        </div>
+
+        <h1>
+            Documentos internos
+        </h1>
+
+        <p>
+            Carga, consulta, descarga y administración
+            de los documentos internos del hotel.
+        </p>
+
+    </div>
+
+    {% if 'documento.cargar' in permisos_usuario %}
+        <a href="{% url 'documentos:cargar_documento' %}"
+           class="btn-new-user"
+           style="text-decoration: none;">
+            <i class="bi bi-plus-lg"></i> Cargar documento
+        </a>
+    {% endif %}
+
+</div>
+
+<section class="management-panel">
+
+    <div class="table-container">
+
+        <table class="users-table">
+
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Área</th>
+                    <th>Categoría</th>
+                    <th>Tipo</th>
+                    <th>Formato</th>
+                    <th>Versión</th>
+                    <th>Fecha de carga</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for documento in pagina %}
+
+                    <tr>
+
+                        <!-- Título -->
+                        <td>
+                            <a href="{% url 'documentos:detalle_documento' documento.pk %}"
+                               class="doc-title-link">
+                                {{ documento.titulo|default:"Sin título" }}
+                            </a>
+                        </td>
+
+                        <!-- Área -->
+                        <td>{{ documento.area.nombre|default:"—" }}</td>
+
+                        <!-- Categoría -->
+                        <td>{{ documento.categoria.nombre|default:"—" }}</td>
+
+                        <!-- Tipo -->
+                        <td>{{ documento.tipo_documento.nombre|default:"—" }}</td>
+
+                        <!-- Formato del archivo -->
+                        <td>
+                            {% if documento.formato_extension %}
+                                <span class="format-pill">
+                                    <i class="bi {{ documento.formato_extension|icono_formato }}"></i>
+                                    {{ documento.formato_extension|etiqueta_formato }}
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <!-- Versión -->
+                        <td>
+                            {% if documento.version_actual %}
+                                <span class="role-pill">v{{ documento.version_actual }}</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <!-- Fecha de carga -->
+                        <td>
+                            {% if documento.fecha_carga %}
+                                {{ documento.fecha_carga|hora_local|date:"d/m/Y H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <!-- Estado -->
+                        <td>
+                            {% if documento.estado %}
+                                <span class="status-pill active-status">Activo</span>
+                            {% else %}
+                                <span class="status-pill inactive-status">Archivado</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Acciones -->
+                        <td>
+
+                            <div class="action-group">
+
+                                <a href="{% url 'documentos:detalle_documento' documento.pk %}"
+                                   class="action-btn"
+                                   title="Ver detalle"
+                                   aria-label="Ver detalle de {{ documento.titulo }}">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                {% if 'documento.descargar' in permisos_usuario %}
+                                    <a href="{% url 'documentos:descargar_documento' documento.pk %}"
+                                       class="action-btn"
+                                       title="Descargar"
+                                       aria-label="Descargar {{ documento.titulo }}">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                {% endif %}
+
+                                {% if 'documento.modificar' in permisos_usuario and documento.estado %}
+                                    <a href="{% url 'documentos:editar_documento' documento.pk %}"
+                                       class="action-btn"
+                                       title="Editar"
+                                       aria-label="Editar {{ documento.titulo }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="9" class="empty-table">
+                            No hay documentos registrados.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Pie de tabla -->
+    <div class="table-footer">
+
+        <span>
+            Documentos: {{ pagina.paginator.count }}
+        </span>
+
+        <span>
+            Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}
+        </span>
+
+    </div>
+
+    {% if pagina.paginator.num_pages > 1 %}
+
+        <nav class="pt-1 pb-4" aria-label="Paginación de documentos">
+
+            <ul class="pagination justify-content-center mb-0">
+
+                {% if pagina.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?pagina={{ pagina.previous_page_number }}">
+                            Anterior
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Anterior</span>
+                    </li>
+                {% endif %}
+
+                {% if pagina.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?pagina={{ pagina.next_page_number }}">
+                            Siguiente
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
