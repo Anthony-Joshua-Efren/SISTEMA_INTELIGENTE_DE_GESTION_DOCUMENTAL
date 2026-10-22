@@ -1,0 +1,509 @@
+{% extends "documentos/base_documentos.html" %}
+
+{% block titulo_pagina %}Organización y búsqueda{% endblock %}
+{% block titulo_topbar %}Organización y búsqueda{% endblock %}
+
+{% block contenido %}
+
+<!-- Encabezado -->
+<div class="module-heading">
+
+    <div>
+        <div class="module-eyebrow">
+            ORGANIZACIÓN Y BÚSQUEDA
+        </div>
+
+        <h1>Buscar documentos</h1>
+
+        <p>
+            Localiza y organiza documentos mediante criterios
+            de búsqueda, filtros y ordenamiento.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- Panel de búsqueda -->
+<section class="management-panel mb-4">
+
+    <div class="p-4">
+
+        <form method="get">
+
+            <!-- Búsqueda general -->
+            <div class="mb-4">
+
+                <label for="q" class="form-label fw-semibold">
+                    Buscar documento
+                </label>
+
+                <div class="input-group">
+
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-search"></i>
+                    </span>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="q"
+                        name="q"
+                        value="{{ filtros.q }}"
+                        placeholder="Título, descripción, proveedor, departamento..."
+                    >
+
+                    <button type="submit" class="btn-confirm-action">
+                        Buscar
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Filtros -->
+            <div class="row g-3">
+
+                <!-- Categoría -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Categoría
+                    </label>
+
+                    <select name="categoria" class="form-select">
+
+                        <option value="">Todas las categorías</option>
+
+                        {% for categoria in categorias %}
+                            <option
+                                value="{{ categoria.pk }}"
+                                {% if filtros.categoria == categoria.pk|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ categoria.nombre }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Área -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Área
+                    </label>
+
+                    <select name="area" class="form-select">
+
+                        <option value="">Todas las áreas</option>
+
+                        {% for area in areas %}
+                            <option
+                                value="{{ area.pk }}"
+                                {% if filtros.area == area.pk|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ area.nombre }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Tipo de documento -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Tipo de documento
+                    </label>
+
+                    <select name="tipo" class="form-select">
+
+                        <option value="">Todos los tipos</option>
+
+                        {% for tipo in tipos_documento %}
+                            <option
+                                value="{{ tipo.pk }}"
+                                {% if filtros.tipo == tipo.pk|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ tipo.nombre }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- Estado -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Estado
+                    </label>
+
+                    <select name="estado" class="form-select">
+
+                        <option value="">Todos</option>
+
+                        <option
+                            value="activo"
+                            {% if filtros.estado == "activo" %}selected{% endif %}
+                        >
+                            Activo
+                        </option>
+
+                        <option
+                            value="archivado"
+                            {% if filtros.estado == "archivado" %}selected{% endif %}
+                        >
+                            Archivado
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Fecha desde -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Fecha desde
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_desde"
+                        value="{{ filtros.fecha_desde }}"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <!-- Fecha hasta -->
+                <div class="col-md-4">
+
+                    <label class="form-label fw-semibold">
+                        Fecha hasta
+                    </label>
+
+                    <input
+                        type="date"
+                        name="fecha_hasta"
+                        value="{{ filtros.fecha_hasta }}"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <!-- Ordenamiento -->
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold">
+                        Ordenar por
+                    </label>
+
+                    <select name="orden" class="form-select">
+
+                        <option
+                            value="recientes"
+                            {% if filtros.orden == "recientes" %}selected{% endif %}
+                        >
+                            Más recientes
+                        </option>
+
+                        <option
+                            value="antiguos"
+                            {% if filtros.orden == "antiguos" %}selected{% endif %}
+                        >
+                            Más antiguos
+                        </option>
+
+                        <option
+                            value="az"
+                            {% if filtros.orden == "az" %}selected{% endif %}
+                        >
+                            Título A-Z
+                        </option>
+
+                        <option
+                            value="za"
+                            {% if filtros.orden == "za" %}selected{% endif %}
+                        >
+                            Título Z-A
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Botones -->
+                <div class="col-md-6 d-flex align-items-end gap-2">
+
+                    <button type="submit" class="btn-confirm-action">
+                        <i class="bi bi-funnel"></i>
+                        Aplicar filtros
+                    </button>
+
+                    <a
+                        href="{% url 'organizacion_busqueda:organizacion_busqueda' %}"
+                        class="btn-secondary-module"
+                    >
+                        <i class="bi bi-x-lg"></i>
+                        Limpiar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<!-- Resultados -->
+<section class="management-panel">
+
+    <div class="p-4 pb-2">
+
+        <div class="module-eyebrow">
+            RESULTADOS
+        </div>
+
+        <h2 class="h4 mb-0">
+            {{ total_resultados }} documento{{ total_resultados|pluralize }}
+            encontrado{{ total_resultados|pluralize }}
+        </h2>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table class="users-table">
+
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Área</th>
+                    <th>Categoría</th>
+                    <th>Tipo</th>
+                    <th>Responsable</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for documento in pagina %}
+
+                    <tr>
+
+                        <!-- Título -->
+                        <td>
+                            <a
+                                href="{% url 'documentos:detalle_documento' documento.pk %}"
+                                class="doc-title-link"
+                            >
+                                {{ documento.titulo|default:"Sin título" }}
+                            </a>
+                        </td>
+
+
+                        <!-- Área -->
+                        <td>
+                            {{ documento.area.nombre|default:"—" }}
+                        </td>
+
+
+                        <!-- Categoría -->
+                        <td>
+                            {{ documento.categoria.nombre|default:"—" }}
+                        </td>
+
+
+                        <!-- Tipo -->
+                        <td>
+                            {{ documento.tipo_documento.nombre|default:"—" }}
+                        </td>
+
+
+                        <!-- Responsable -->
+                        <td>
+
+                            {% if documento.usuario_responsable %}
+
+                                {{ documento.usuario_responsable.get_full_name|default:documento.usuario_responsable.username }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Fecha -->
+                        <td>
+
+                            {% if documento.fecha_documento %}
+
+                                {{ documento.fecha_documento|date:"d/m/Y" }}
+
+                            {% else %}
+
+                                —
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Estado -->
+                        <td>
+
+                            {% if documento.estado %}
+
+                                <span class="status-pill active-status">
+                                    Activo
+                                </span>
+
+                            {% else %}
+
+                                <span class="status-pill inactive-status">
+                                    Archivado
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Acciones -->
+                        <td>
+
+                            <div class="action-group">
+
+                                <a
+                                    href="{% url 'documentos:detalle_documento' documento.pk %}"
+                                    class="action-btn"
+                                    title="Ver detalle"
+                                >
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                {% if 'documento.descargar' in permisos_usuario %}
+
+                                    <a
+                                        href="{% url 'documentos:descargar_documento' documento.pk %}"
+                                        class="action-btn"
+                                        title="Descargar"
+                                    >
+                                        <i class="bi bi-download"></i>
+                                    </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                {% empty %}
+
+                    <tr>
+
+                        <td colspan="8" class="empty-table">
+
+                            No se encontraron documentos con los criterios seleccionados.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- Pie -->
+    <div class="table-footer">
+
+        <span>
+            Resultados: {{ total_resultados }}
+        </span>
+
+        <span>
+            Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}
+        </span>
+
+    </div>
+        {% if pagina.paginator.num_pages > 1 %}
+
+    <nav class="pt-1 pb-4" aria-label="Paginación de resultados">
+
+        <ul class="pagination justify-content-center mb-0">
+
+            {% if pagina.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?q={{ filtros.q|urlencode }}&categoria={{ filtros.categoria }}&area={{ filtros.area }}&tipo={{ filtros.tipo }}&estado={{ filtros.estado }}&fecha_desde={{ filtros.fecha_desde }}&fecha_hasta={{ filtros.fecha_hasta }}&orden={{ filtros.orden }}&pagina={{ pagina.previous_page_number }}">
+                        Anterior
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Anterior</span>
+                </li>
+            {% endif %}
+
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    {{ pagina.number }} de {{ pagina.paginator.num_pages }}
+                </span>
+            </li>
+
+
+            {% if pagina.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?q={{ filtros.q|urlencode }}&categoria={{ filtros.categoria }}&area={{ filtros.area }}&tipo={{ filtros.tipo }}&estado={{ filtros.estado }}&fecha_desde={{ filtros.fecha_desde }}&fecha_hasta={{ filtros.fecha_hasta }}&orden={{ filtros.orden }}&pagina={{ pagina.next_page_number }}">
+                        Siguiente
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Siguiente</span>
+                </li>
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+{% endif %}
+</section>
+
+{% endblock %}

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'usuarios.apps.UsuariosConfig',
     'documentos.apps.DocumentosConfig',
     'auditoria.apps.AuditoriaConfig',
+    'organizacion_busqueda.apps.OrganizacionBusquedaConfig',
 ]
 
 MIDDLEWARE = [

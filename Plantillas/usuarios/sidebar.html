@@ -36,11 +36,13 @@
         {% endif %}
 
         {% if modulos.organizacion_busqueda %}
-        <a href="#" class="sidebar-link" title="Organización y búsqueda">
-            <i class="bi bi-search"></i>
-            <span>Organización y búsqueda</span>
-        </a>
-        {% endif %}
+<a href="{% url 'organizacion_busqueda:organizacion_busqueda' %}"
+   class="sidebar-link {% if request.resolver_match.app_name == 'organizacion_busqueda' %}active{% endif %}"
+   title="Organización y búsqueda">
+    <i class="bi bi-search"></i>
+    <span>Organización y búsqueda</span>
+</a>
+{% endif %}
 
         {% if modulos.versiones %}
         <a href="#" class="sidebar-link" title="Versiones y trazabilidad">
