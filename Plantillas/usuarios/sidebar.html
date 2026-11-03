@@ -45,7 +45,7 @@
 {% endif %}
 
         {% if modulos.versiones %}
-        <a href="#" class="sidebar-link" title="Versiones y trazabilidad">
+        <a href="{% url 'documentos:resumen_versiones' %}" class="sidebar-link {% if request.resolver_match.app_name == 'auditoria' or request.resolver_match.url_name == 'resumen_versiones' or request.resolver_match.url_name == 'historial_versiones' or request.resolver_match.url_name == 'nueva_version' %}active{% endif %}" title="Versiones y trazabilidad">
             <i class="bi bi-clock-history"></i>
             <span>Versiones y trazabilidad</span>
         </a>

@@ -1,0 +1,194 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}Comparar versiones{% endblock %}
+{% block titulo_topbar %}Versiones y trazabilidad{% endblock %}
+
+{% block contenido %}
+
+<style>
+    .diff-caja {
+        font-family: Consolas, "Courier New", monospace;
+        font-size: .87rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .diff-caja div {
+        padding: 2px 12px;
+        white-space: pre-wrap;
+        min-height: 1.5em;
+        overflow-wrap: anywhere;
+    }
+    .diff-add { background: #def5e7; color: #14653d; }
+    .diff-add::before { content: "+ "; font-weight: 700; }
+    .diff-del { background: #fae8e8; color: #9a3b32; }
+    .diff-del::before { content: "− "; font-weight: 700; }
+    .diff-ctx { background: #ffffff; color: #46515a; }
+    .diff-sep { background: #f5f5f3; color: var(--muted); text-align: center; }
+    .version-card {
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fdfcf9;
+        height: 100%;
+    }
+</style>
+
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">VERSIONES Y TRAZABILIDAD</div>
+        <h1>Comparar versiones</h1>
+        <p>«{{ documento.titulo|default:"Sin título" }}»</p>
+    </div>
+</div>
+
+<div class="doc-actions">
+    <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+       class="btn-secondary-module">
+        <i class="bi bi-arrow-left"></i> Volver al historial
+    </a>
+</div>
+
+<!-- Selector -->
+<section class="management-panel mb-4">
+    <form method="get" class="row g-3 p-3 align-items-end">
+
+        <div class="col-12 col-md-5">
+            <label class="form-label small fw-semibold" for="selA">Versión A (anterior)</label>
+            <select id="selA" name="a" class="form-select">
+                {% for v in versiones %}
+                    <option value="{{ v.pk }}" {% if v.pk == a.pk %}selected{% endif %}>
+                        v{{ v.numero_version }} — {{ v.fecha_creacion|hora_local|date:"d/m/Y H:i" }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-5">
+            <label class="form-label small fw-semibold" for="selB">Versión B (reciente)</label>
+            <select id="selB" name="b" class="form-select">
+                {% for v in versiones %}
+                    <option value="{{ v.pk }}" {% if v.pk == b.pk %}selected{% endif %}>
+                        v{{ v.numero_version }} — {{ v.fecha_creacion|hora_local|date:"d/m/Y H:i" }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-2">
+            <button type="submit" class="btn-new-user w-100 justify-content-center">
+                <i class="bi bi-layout-split"></i> Comparar
+            </button>
+        </div>
+
+    </form>
+</section>
+
+<!-- Datos de cada versión -->
+<div class="row g-3 mb-4">
+
+
+    <div class="col-12 col-md-6">
+        <div class="version-card">
+            <div class="mb-1"><span class="role-pill">A · v{{ a.numero_version }}</span></div>
+            <div><strong>{{ a.usuario.get_full_name|default:a.usuario.username }}</strong></div>
+            <div class="text-secondary small">{{ a.fecha_creacion|hora_local|date:"d/m/Y H:i" }}</div>
+            <div class="mt-2">{{ a.comentario_cambio|default:"Sin comentario." }}</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="version-card">
+            <div class="mb-1"><span class="role-pill">B · v{{ b.numero_version }}</span></div>
+            <div><strong>{{ b.usuario.get_full_name|default:b.usuario.username }}</strong></div>
+            <div class="text-secondary small">{{ b.fecha_creacion|hora_local|date:"d/m/Y H:i" }}</div>
+            <div class="mt-2">{{ b.comentario_cambio|default:"Sin comentario." }}</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Contenido -->
+<section class="management-panel">
+    <div class="panel-inner">
+
+        {% if error %}
+
+            <div class="alert alert-danger mb-0">{{ error }}</div>
+
+        {% elif modo == "texto" %}
+
+            <div class="inner-heading mb-3">
+                  <h2>Diferencias de texto</h2><p class="text-secondary small">En Word, Excel y PowerPoint se compara solo el texto, no el formato ni las imágenes.</p>
+                <p>
+                    <span class="status-pill active-status">+ agregado en B</span>
+                    <span class="status-pill" style="background:#fae8e8;color:#9a3b32;">− eliminado de A</span>
+                </p>
+            </div>
+
+            {% if diferencias %}
+                <div class="diff-caja">
+                    {% for linea in diferencias %}
+                        <div class="diff-{{ linea.tipo }}">{{ linea.texto }}</div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-secondary mb-0">
+                    El contenido de texto de las dos versiones es idéntico.
+                </p>
+            {% endif %}
+
+        {% elif modo == "visual" %}
+
+            <div class="row g-3">
+
+                <div class="col-12 col-lg-6">
+                    <h2 class="h6 fw-bold">Versión A · v{{ a.numero_version }}</h2>
+                    {% if categoria_a == "imagen" %}
+                        <img class="vista-previa-imagen" alt="Versión A"
+                             src="{% url 'documentos:vista_previa_version' documento.pk a.pk %}">
+                    {% else %}
+                        <iframe class="vista-previa-marco" title="Versión A"
+                                src="{% url 'documentos:vista_previa_version' documento.pk a.pk %}"></iframe>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 col-lg-6">
+                    <h2 class="h6 fw-bold">Versión B · v{{ b.numero_version }}</h2>
+                    {% if categoria_b == "imagen" %}
+                        <img class="vista-previa-imagen" alt="Versión B"
+                             src="{% url 'documentos:vista_previa_version' documento.pk b.pk %}">
+                    {% else %}
+                        <iframe class="vista-previa-marco" title="Versión B"
+                                src="{% url 'documentos:vista_previa_version' documento.pk b.pk %}"></iframe>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        {% else %}
+
+            <div class="text-center py-4">
+                <i class="bi bi-file-earmark-diff fs-1" style="color: var(--gold);"></i>
+                <h2 class="h5 mt-3">Sin comparación visual para este formato</h2>
+                <p class="text-secondary">
+                      Estos formatos (por ejemplo, Word, Excel o PowerPoint antiguos, o dos formatos distintos) no se pueden comparar
+                    dentro del navegador. Descarga las dos versiones para compararlas.
+                </p>
+                <a href="{% url 'documentos:descargar_version' documento.pk a.pk %}"
+                   class="btn-secondary-module">
+                    <i class="bi bi-download"></i> Descargar v{{ a.numero_version }}
+                </a>
+                <a href="{% url 'documentos:descargar_version' documento.pk b.pk %}"
+                   class="btn-secondary-module">
+                    <i class="bi bi-download"></i> Descargar v{{ b.numero_version }}
+                </a>
+            </div>
+
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

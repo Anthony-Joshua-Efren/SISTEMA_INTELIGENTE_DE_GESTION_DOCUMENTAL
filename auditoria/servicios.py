@@ -18,6 +18,7 @@ class Resultado:
 
 
 class Accion:
+    # Documentos
     DOCUMENTO_CARGAR = "documento.cargar"
     DOCUMENTO_CONSULTAR = "documento.consultar"
     DOCUMENTO_DESCARGAR = "documento.descargar"
@@ -25,6 +26,23 @@ class Accion:
     DOCUMENTO_MODIFICAR = "documento.modificar"
     DOCUMENTO_BAJA = "documento.archivar"
     DOCUMENTO_REACTIVAR = "documento.reactivar"
+
+    # Versiones
+    VERSION_CREAR = "documento.versionar"
+    VERSION_CONSULTAR = "version.consultar"
+    VERSION_DESCARGAR = "version.descargar"
+    VERSION_RESTAURAR = "version.restaurar"
+
+    # Sesión
+    SESION_INICIO = "sesion.inicio"
+    SESION_CIERRE = "sesion.cierre"
+
+    # Administración
+    USUARIO_CREAR = "usuario.crear"
+    USUARIO_MODIFICAR = "usuario.modificar"
+    USUARIO_ESTADO = "usuario.estado"
+    ROL_ESTADO = "rol.estado"
+    AREA_ESTADO = "area.estado"
 
 
 def registrar_auditoria(usuario, accion, documento=None,

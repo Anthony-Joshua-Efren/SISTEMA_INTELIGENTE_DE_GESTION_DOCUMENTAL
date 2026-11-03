@@ -1,0 +1,464 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}Comparar versiones{% endblock %}
+{% block titulo_topbar %}Versiones y trazabilidad{% endblock %}
+
+{% block contenido %}
+
+<style>
+    .cmp-selector {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 14px;
+        margin-bottom: 20px;
+        padding: 18px 22px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .cmp-selector label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 200px;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--gold-dark);
+    }
+
+    .cmp-selector select { font-weight: 500; text-transform: none; letter-spacing: 0; }
+    .cmp-selector .bi-arrow-right { padding-bottom: 12px; color: var(--muted); }
+
+    .cmp-versiones {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .cmp-ver {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 16px 20px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        font-size: .9rem;
+        color: #52616a;
+    }
+
+    .cmp-ver-a { border-left: 5px solid #d9544f; }
+    .cmp-ver-b { border-left: 5px solid #2e9e6b; }
+
+    .cmp-ver-etiqueta {
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--gold-dark);
+    }
+
+    .cmp-ver strong { font-size: 1.4rem; color: var(--text); }
+    .cmp-ver em { margin-top: 4px; color: var(--muted); }
+
+    .cmp-resumen {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .cmp-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: .87rem;
+        font-weight: 600;
+    }
+
+    .chip-add { background: #def5e7; color: #1b7b4b; }
+    .chip-del { background: #fbe4e2; color: #b42318; }
+    .chip-mod { background: #fdf1d4; color: #8a6516; }
+    .chip-zonas { background: #edf0f2; color: #52616a; }
+
+    .cmp-barra {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .cmp-barra .btn-secondary-module { padding: 9px 15px; font-size: .88rem; }
+    #cmp-contador { font-size: .88rem; font-weight: 600; color: #52616a; }
+    .cmp-nota { margin: 0 0 14px; font-size: .85rem; color: var(--muted); }
+
+    .cmp-scroll {
+        max-height: 70vh;
+        overflow: auto;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .cmp-tabla {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: .92rem;
+        line-height: 1.55;
+    }
+
+    .cmp-tabla thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 11px 14px;
+        background: #f5f5f3;
+        border-bottom: 1px solid var(--border);
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: #43505a;
+    }
+
+    .cmp-tabla td {
+        padding: 5px 12px;
+        vertical-align: top;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        border-bottom: 1px solid #f3f1ed;
+    }
+
+    .cmp-tabla td.cmp-num {
+        width: 52px;
+        padding-right: 10px;
+        text-align: right;
+        font-size: .78rem;
+        color: #9aa3aa;
+        background: #fafaf8;
+        user-select: none;
+    }
+
+    .cmp-tabla td:nth-child(3) { border-left: 2px solid var(--border); }
+
+    .f-mod td:nth-child(1),
+    .f-mod td:nth-child(2),
+    .f-del td:nth-child(1),
+    .f-del td:nth-child(2) { background: #fdeeed; }
+
+    .f-mod td:nth-child(3),
+    .f-mod td:nth-child(4),
+    .f-add td:nth-child(3),
+    .f-add td:nth-child(4) { background: #e8f7ee; }
+
+    .f-del td:nth-child(3),
+    .f-del td:nth-child(4),
+    .f-add td:nth-child(1),
+    .f-add td:nth-child(2) {
+        background: repeating-linear-gradient(
+            45deg, #f6f5f2, #f6f5f2 6px, #efede8 6px, #efede8 12px
+        );
+    }
+
+    mark.pal-del { padding: 1px 2px; border-radius: 3px; background: #f5b5b0; color: #7a1a14; }
+    mark.pal-add { padding: 1px 2px; border-radius: 3px; background: #9fdcb7; color: #0f5a33; }
+
+    .linea-vacia { font-size: .8rem; font-style: italic; color: #9aa3aa; }
+
+    .f-plegado td { padding: 0; background: #f5f5f3; }
+
+    .cmp-plegado-btn {
+        width: 100%;
+        padding: 8px;
+        border: 0;
+        background: transparent;
+        font-size: .84rem;
+        font-weight: 600;
+        color: var(--gold-dark);
+        cursor: pointer;
+    }
+
+    .cmp-plegado-btn:hover { background: #ece9e2; }
+
+    .cmp-actual td:first-child { box-shadow: inset 5px 0 0 var(--gold); }
+
+    @media (max-width: 768px) {
+        .cmp-versiones { grid-template-columns: 1fr; }
+        .cmp-tabla { font-size: .84rem; }
+        .cmp-tabla td.cmp-num { width: 34px; padding-left: 4px; }
+    }
+</style>
+
+<!-- Encabezado -->
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">VERSIONES Y TRAZABILIDAD</div>
+        <h1>Comparar versiones</h1>
+        <p>{{ documento.titulo|default:"Documento sin título" }}</p>
+    </div>
+
+    <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+       class="btn-secondary-module">
+        <i class="bi bi-arrow-left"></i> Volver al historial
+    </a>
+</div>
+
+<!-- Selector de versiones -->
+<form method="get" class="cmp-selector">
+
+    <label>
+        Versión A (anterior)
+        <select name="a" class="form-select">
+            {% for v in versiones %}
+                <option value="{{ v.pk }}" {% if v.pk == a.pk %}selected{% endif %}>
+                    v{{ v.numero_version }} · {{ v.fecha_creacion|hora_local|date:"d/m/Y H:i" }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <i class="bi bi-arrow-right"></i>
+
+    <label>
+        Versión B (más reciente)
+        <select name="b" class="form-select">
+            {% for v in versiones %}
+                <option value="{{ v.pk }}" {% if v.pk == b.pk %}selected{% endif %}>
+                    v{{ v.numero_version }} · {{ v.fecha_creacion|hora_local|date:"d/m/Y H:i" }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <button type="submit" class="btn-new-user">
+        <i class="bi bi-arrow-left-right"></i> Comparar
+    </button>
+
+</form>
+
+<!-- Datos de cada versión -->
+<div class="cmp-versiones">
+
+    <div class="cmp-ver cmp-ver-a">
+        <span class="cmp-ver-etiqueta">Versión A · anterior</span>
+        <strong>v{{ a.numero_version }}</strong>
+        <span>Subida por {{ a.usuario.get_full_name|default:a.usuario.username }}</span>
+        <span>{{ a.fecha_creacion|hora_local|date:"d/m/Y H:i" }}</span>
+        {% if a.comentario_cambio %}<em>«{{ a.comentario_cambio }}»</em>{% endif %}
+    </div>
+
+    <div class="cmp-ver cmp-ver-b">
+        <span class="cmp-ver-etiqueta">Versión B · más reciente</span>
+        <strong>v{{ b.numero_version }}</strong>
+        <span>Subida por {{ b.usuario.get_full_name|default:b.usuario.username }}</span>
+        <span>{{ b.fecha_creacion|hora_local|date:"d/m/Y H:i" }}</span>
+        {% if b.comentario_cambio %}<em>«{{ b.comentario_cambio }}»</em>{% endif %}
+    </div>
+
+</div>
+
+{% if resumen.zonas == 0 %}
+
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle me-2"></i>
+        El texto de las dos versiones es idéntico. Si hubo cambios, fueron
+        de formato o de imágenes, que esta comparación no detecta.
+    </div>
+
+{% else %}
+
+    <!-- Resumen -->
+    <div class="cmp-resumen">
+        <span class="cmp-chip chip-add">
+            <i class="bi bi-plus-circle"></i>
+            {{ resumen.agregadas }} línea{{ resumen.agregadas|pluralize }} agregada{{ resumen.agregadas|pluralize }}
+        </span>
+        <span class="cmp-chip chip-del">
+            <i class="bi bi-dash-circle"></i>
+            {{ resumen.eliminadas }} línea{{ resumen.eliminadas|pluralize }} eliminada{{ resumen.eliminadas|pluralize }}
+        </span>
+        <span class="cmp-chip chip-mod">
+            <i class="bi bi-pencil"></i>
+            {{ resumen.modificadas }} línea{{ resumen.modificadas|pluralize }} modificada{{ resumen.modificadas|pluralize }}
+        </span>
+        <span class="cmp-chip chip-zonas">
+            <i class="bi bi-layers"></i>
+            {{ resumen.zonas }} zona{{ resumen.zonas|pluralize }} con cambios
+        </span>
+    </div>
+
+    <!-- Navegación -->
+    <div class="cmp-barra">
+        <button type="button" class="btn-secondary-module" id="cmp-anterior">
+            <i class="bi bi-arrow-up"></i> Cambio anterior
+        </button>
+        <button type="button" class="btn-secondary-module" id="cmp-siguiente">
+            <i class="bi bi-arrow-down"></i> Siguiente cambio
+        </button>
+        <span id="cmp-contador">{{ resumen.zonas }} zona{{ resumen.zonas|pluralize }} con cambios</span>
+
+        <button type="button" class="btn-secondary-module ms-auto" id="cmp-todo">
+            <i class="bi bi-arrows-expand"></i> Mostrar todo el documento
+        </button>
+    </div>
+
+    <p class="cmp-nota">
+        Izquierda: la versión A. Derecha: la versión B. En <strong>rojo</strong> lo
+        que estaba en A, en <strong>verde</strong> lo que aparece en B, y las
+        palabras con color más intenso son las que cambiaron dentro de una línea.
+        En Word, Excel y PowerPoint se compara solo el texto, no el formato ni las imágenes.
+    </p>
+
+    <!-- Comparación -->
+    <div class="cmp-scroll">
+        <table class="cmp-tabla">
+
+            <thead>
+                <tr>
+                    <th class="cmp-num"></th>
+                    <th>Versión A · v{{ a.numero_version }}</th>
+                    <th class="cmp-num"></th>
+                    <th>Versión B · v{{ b.numero_version }}</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for fila in filas %}
+
+                    {% if fila.clase == 'plegado' %}
+
+                        <tr class="f-plegado">
+                            <td colspan="4">
+                                <button type="button"
+                                        class="cmp-plegado-btn"
+                                        data-grupo="{{ fila.grupo }}"
+                                        data-cantidad="{{ fila.cantidad }}">
+                                    ⋯ Mostrar {{ fila.cantidad }} línea{{ fila.cantidad|pluralize }} sin cambios
+                                </button>
+                            </td>
+                        </tr>
+
+                    {% else %}
+
+                        <tr class="f-{{ fila.clase }}"
+                            {% if fila.grupo %}data-grupo="{{ fila.grupo }}" hidden{% endif %}
+                            {% if fila.inicio %}data-cambio="{{ fila.ancla }}"{% endif %}>
+                            <td class="cmp-num">{{ fila.num_a }}</td>
+                            <td>{{ fila.html_a }}</td>
+                            <td class="cmp-num">{{ fila.num_b }}</td>
+                            <td>{{ fila.html_b }}</td>
+                        </tr>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const botones = document.querySelectorAll(".cmp-plegado-btn");
+    const zonas = Array.from(document.querySelectorAll("tr[data-cambio]"));
+    const contador = document.getElementById("cmp-contador");
+    const botonTodo = document.getElementById("cmp-todo");
+
+    let actual = -1;
+    let todoAbierto = false;
+
+    function etiqueta(cantidad, abierto) {
+        const lineas = cantidad + (cantidad === 1 ? " línea" : " líneas");
+        return (abierto ? "⋯ Ocultar " : "⋯ Mostrar ") + lineas + " sin cambios";
+    }
+
+    function fijar(boton, abrir) {
+        const filas = document.querySelectorAll(
+            'tr[data-grupo="' + boton.dataset.grupo + '"]'
+        );
+
+        filas.forEach(function (fila) {
+            fila.hidden = !abrir;
+        });
+
+        boton.textContent = etiqueta(Number(boton.dataset.cantidad), abrir);
+    }
+
+    botones.forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            const primera = document.querySelector(
+                'tr[data-grupo="' + boton.dataset.grupo + '"]'
+            );
+            fijar(boton, primera ? primera.hidden : true);
+        });
+    });
+
+    if (botonTodo) {
+        botonTodo.addEventListener("click", function () {
+            todoAbierto = !todoAbierto;
+
+            botones.forEach(function (boton) {
+                fijar(boton, todoAbierto);
+            });
+
+            botonTodo.innerHTML = todoAbierto
+                ? '<i class="bi bi-arrows-collapse"></i> Mostrar solo cambios'
+                : '<i class="bi bi-arrows-expand"></i> Mostrar todo el documento';
+        });
+    }
+
+    function ir(indice) {
+        if (!zonas.length) {
+            return;
+        }
+
+        actual = (indice + zonas.length) % zonas.length;
+
+        zonas.forEach(function (zona) {
+            zona.classList.remove("cmp-actual");
+        });
+
+        const zona = zonas[actual];
+        zona.classList.add("cmp-actual");
+        zona.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        contador.textContent = "Cambio " + (actual + 1) + " de " + zonas.length;
+    }
+
+    const siguiente = document.getElementById("cmp-siguiente");
+    const anterior = document.getElementById("cmp-anterior");
+
+    if (siguiente) {
+        siguiente.addEventListener("click", function () {
+            ir(actual + 1);
+        });
+    }
+
+    if (anterior) {
+        anterior.addEventListener("click", function () {
+            ir(actual <= 0 ? zonas.length - 1 : actual - 1);
+        });
+    }
+
+});
+</script>
+{% endblock %}

@@ -210,3 +210,84 @@ class DocumentoCargarForm(DocumentoForm):
         self.formato = formato
 
         return archivo
+# ==========================================================
+# NUEVA VERSIÓN DE UN DOCUMENTO
+# ==========================================================
+
+class NuevaVersionForm(forms.Form):
+
+    archivo = forms.FileField(
+        label="Archivo",
+        error_messages={"required": "Selecciona el archivo de la nueva versión."},
+    )
+
+    comentario_cambio = forms.CharField(
+        label="Comentario del cambio",
+        max_length=1000,
+        widget=forms.Textarea(attrs={"rows": 3}),
+        error_messages={
+            "required": "Describe brevemente qué cambió en esta versión."
+        },
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.formato = None
+        self._formatos = {}
+
+        for formato in FormatoArchivo.objects.filter(estado=True):
+            extension = (formato.extension or "").strip().lstrip(".").lower()
+
+            if extension:
+                self._formatos[extension] = formato
+
+        if self._formatos:
+            permitidos = ", ".join(
+                ".%s" % extension for extension in sorted(self._formatos)
+            )
+            self.fields["archivo"].help_text = (
+                "Formatos permitidos: %s. Tamaño máximo: %s MB."
+                % (permitidos, TAMANO_MAXIMO_MB)
+            )
+
+        for campo in self.fields.values():
+            campo.widget.attrs["class"] = "form-control"
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data["archivo"]
+
+        if not self._formatos:
+            raise forms.ValidationError(
+                "No hay formatos de archivo activos configurados. "
+                "Contacta al administrador."
+            )
+
+        extension = Path(archivo.name).suffix.lstrip(".").lower()
+
+        if not extension:
+            raise forms.ValidationError("El archivo no tiene extensión.")
+
+        formato = self._formatos.get(extension)
+
+        if formato is None:
+            permitidos = ", ".join(
+                ".%s" % ext for ext in sorted(self._formatos)
+            )
+            raise forms.ValidationError(
+                "El formato .%s no está permitido. Formatos permitidos: %s."
+                % (extension, permitidos)
+            )
+
+        if archivo.size == 0:
+            raise forms.ValidationError("El archivo está vacío.")
+
+        if archivo.size > TAMANO_MAXIMO_MB * 1024 * 1024:
+            raise forms.ValidationError(
+                "El archivo supera el tamaño máximo de %s MB."
+                % TAMANO_MAXIMO_MB
+            )
+
+        self.formato = formato
+
+        return archivo
