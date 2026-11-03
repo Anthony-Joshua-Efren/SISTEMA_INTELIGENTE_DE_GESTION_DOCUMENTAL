@@ -1,0 +1,283 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}Accesos al documento{% endblock %}
+{% block titulo_topbar %}Versiones y trazabilidad{% endblock %}
+
+{% block contenido %}
+
+<style>
+    .acc-resumen {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .acc-tarjeta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px 20px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .acc-tarjeta span {
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--gold-dark);
+    }
+
+    .acc-tarjeta strong { font-size: 1.5rem; color: var(--text); }
+    .acc-tarjeta small { color: var(--muted); }
+
+    .acc-filtros {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 14px;
+        margin-bottom: 18px;
+        padding: 16px 22px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+    }
+
+    .acc-filtros label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 200px;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--gold-dark);
+    }
+
+    .acc-filtros select { font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+    .acc-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        border-radius: 7px;
+        font-size: .78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .acc-descarga { background: #e9eff8; color: #355d87; }
+    .acc-vista { background: #eee6d8; color: #705936; }
+    .acc-consulta { background: #edf0f2; color: #52616a; }
+    .acc-otro { background: #edf0f2; color: #52616a; }
+
+    .res-exitoso { background: #def5e7; color: #1b7b4b; }
+    .res-denegado { background: #fdf1d4; color: #8a6516; }
+    .res-error { background: #fbe4e2; color: #b42318; }
+
+    .acc-nota { margin: 0 0 14px; font-size: .85rem; color: var(--muted); }
+
+    @media (max-width: 768px) {
+        .acc-resumen { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- Encabezado -->
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">VERSIONES Y TRAZABILIDAD</div>
+        <h1>Accesos al documento</h1>
+        <p>{{ documento.titulo|default:"Documento sin título" }}</p>
+    </div>
+
+    <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+       class="btn-secondary-module">
+        <i class="bi bi-arrow-left"></i> Volver al historial
+    </a>
+</div>
+
+<!-- Resumen -->
+<div class="acc-resumen">
+
+    <div class="acc-tarjeta">
+        <span>Descargas</span>
+        <strong>{{ total_descargas }}</strong>
+        <small>De cualquier versión</small>
+    </div>
+
+    <div class="acc-tarjeta">
+        <span>Vistas previas</span>
+        <strong>{{ total_vistas }}</strong>
+        <small>Aperturas dentro del navegador</small>
+    </div>
+
+    <div class="acc-tarjeta">
+        <span>Último acceso</span>
+        {% if ultimo %}
+            <strong style="font-size: 1.1rem;">
+                {{ ultimo.fecha_hora|hora_local|date:"d/m/Y H:i" }}
+            </strong>
+            <small>{{ ultimo.usuario.get_full_name|default:ultimo.usuario.username }}</small>
+        {% else %}
+            <strong style="font-size: 1.1rem;">—</strong>
+            <small>Sin accesos registrados</small>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Filtros -->
+<form method="get" class="acc-filtros">
+
+    <label>
+        Tipo de acceso
+        <select name="tipo" class="form-select" onchange="this.form.submit()">
+            {% for clave, etiqueta in opciones %}
+                <option value="{{ clave }}" {% if clave == filtro %}selected{% endif %}>
+                    {{ etiqueta }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label>
+        Usuario
+        <select name="usuario" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos los usuarios</option>
+            {% for u in usuarios %}
+                <option value="{{ u.id }}"
+                        {% if u.id|stringformat:"s" == usuario_id %}selected{% endif %}>
+                    {{ u.nombre }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+
+    {% if filtro or usuario_id %}
+        <a href="{% url 'documentos:accesos_documento' documento.pk %}"
+           class="btn-secondary-module">
+            <i class="bi bi-x-circle"></i> Limpiar filtros
+        </a>
+    {% endif %}
+
+</form>
+
+<p class="acc-nota">
+    <i class="bi bi-shield-lock"></i>
+    Solo los usuarios con permiso de auditoría pueden ver esta información.
+</p>
+
+<!-- Tabla -->
+<section class="management-panel">
+
+    <div class="table-container">
+
+        <table class="users-table" style="min-width: 820px;">
+
+            <thead>
+                <tr>
+                    <th>Fecha y hora</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Detalle</th>
+                    <th>Resultado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for registro in filas %}
+
+                    <tr>
+
+                        <td>{{ registro.fecha_hora|hora_local|date:"d/m/Y H:i" }}</td>
+
+                        <td>
+                            <strong>{{ registro.usuario.get_full_name|default:registro.usuario.username }}</strong>
+                            {% if registro.usuario.area %}
+                                <br><small class="text-secondary">{{ registro.usuario.area.nombre }}</small>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="acc-pill {{ registro.clase }}">
+                                <i class="bi {{ registro.icono }}"></i>
+                                {{ registro.etiqueta }}
+                            </span>
+                        </td>
+
+                        <td>{{ registro.descripcion|default:"—" }}</td>
+
+                        <td>
+                            <span class="acc-pill res-{{ registro.resultado|default:'exitoso' }}">
+                                {{ registro.resultado|default:"exitoso"|capfirst }}
+                            </span>
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="5" class="empty-table">
+                            No hay accesos registrados con este filtro.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="table-footer">
+        <span>Registros: {{ pagina.paginator.count }}</span>
+        <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    </div>
+
+    {% if pagina.paginator.num_pages > 1 %}
+
+        <nav class="pt-1 pb-4" aria-label="Paginación de accesos">
+
+            <ul class="pagination justify-content-center mb-0">
+
+                {% if pagina.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?{% if consulta %}{{ consulta }}&{% endif %}pagina={{ pagina.previous_page_number }}">
+                            Anterior
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                {% endif %}
+
+                {% if pagina.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?{% if consulta %}{{ consulta }}&{% endif %}pagina={{ pagina.next_page_number }}">
+                            Siguiente
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "documentos/base_documentos.html" %}
+
+{% block titulo_pagina %}Nueva versión{% endblock %}
+{% block titulo_topbar %}Versiones y trazabilidad{% endblock %}
+
+{% block contenido %}
+
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">VERSIONES Y TRAZABILIDAD</div>
+        <h1>Nueva versión</h1>
+        <p>
+            Documento: «{{ documento.titulo|default:"Sin título" }}».
+            Las versiones anteriores se conservan.
+        </p>
+    </div>
+</div>
+
+<section class="management-panel">
+
+    <div class="panel-inner">
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+
+            {% csrf_token %}
+
+            {% if formulario.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ formulario.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
+
+                {% for campo in formulario %}
+
+                    <div class="col-12">
+
+                        <label for="{{ campo.id_for_label }}"
+                               class="form-label fw-semibold">
+                            {{ campo.label }}
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        {{ campo }}
+
+                        {% if campo.help_text %}
+                            <div class="form-text">{{ campo.help_text }}</div>
+                        {% endif %}
+
+                        {% for error in campo.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3"
+                 style="border-top: 1px solid var(--border);">
+
+                <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+                   class="btn-secondary-module">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="btn-new-user">
+                    <i class="bi bi-upload"></i> Registrar versión
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -25,6 +25,7 @@ from .almacenamiento import abrir_archivo, eliminar_archivo, guardar_archivo
 from .forms import DocumentoCargarForm, DocumentoForm
 from .models import Documento, VersionDocumento
 from .permisos import documentos_visibles, es_administrador
+from .trazabilidad import describir_modificacion
 
 logger = logging.getLogger(__name__)
 
@@ -320,8 +321,8 @@ def editar_documento(request, documento_id):
                     request.user,
                     Accion.DOCUMENTO_MODIFICAR,
                     documento,
-                    "Modificación del documento «%s». Campos: %s."
-                    % (documento.titulo, campos)
+                    describir_modificacion(formulario, documento)
+
                 )
 
             messages.success(

@@ -1,0 +1,340 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}Versiones y trazabilidad{% endblock %}
+{% block titulo_topbar %}Versiones y trazabilidad{% endblock %}
+
+{% block contenido %}
+
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">VERSIONES Y TRAZABILIDAD</div>
+        <h1>Trazabilidad de documentos</h1>
+        <p>
+            Consulta quién cambió cada documento, qué cambió y recupera
+            versiones anteriores.
+        </p>
+    </div>
+</div>
+
+<section class="management-panel">
+
+    <div class="table-container">
+
+        <table class="users-table">
+
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Área</th>
+                    <th>Versión vigente</th>
+                    <th>Total de versiones</th>
+                    <th>Última actualización</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for documento in pagina %}
+
+                    <tr>
+
+                        <td>
+                            <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+                               class="doc-title-link">
+                                {{ documento.titulo|default:"Sin título" }}
+                            </a>
+                        </td>
+
+                        <td>{{ documento.area.nombre|default:"—" }}</td>
+
+                        <td>
+                            {% if documento.ultima_version %}
+                                <span class="role-pill">v{{ documento.ultima_version }}</span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>{{ documento.total_versiones }}</td>
+
+                        <td>
+                            {% if documento.ultima_fecha %}
+                                {{ documento.ultima_fecha|hora_local|date:"d/m/Y H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if documento.estado %}
+                                <span class="status-pill active-status">Activo</span>
+                            {% else %}
+                                <span class="status-pill inactive-status">Archivado</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="action-group">
+
+                                <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+                                   class="action-btn"
+                                   title="Ver historial del documento"
+                                   aria-label="Ver historial de {{ documento.titulo }}">
+                                    <i class="bi bi-clock-history"></i>
+                                </a>
+
+                                {% if 'documento.versionar' in permisos_usuario and documento.estado %}
+                                    <a href="{% url 'documentos:nueva_version' documento.pk %}"
+                                       class="action-btn"
+                                       title="Registrar nueva versión"
+                                       aria-label="Nueva versión de {{ documento.titulo }}">
+                                        <i class="bi bi-file-earmark-plus"></i>
+                                    </a>
+                                {% endif %}
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="7" class="empty-table">
+                            No hay documentos disponibles.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="table-footer">
+        <span>Documentos: {{ pagina.paginator.count }}</span>
+        <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+    </div>
+
+    {% if pagina.paginator.num_pages > 1 %}
+
+        <nav class="pt-1 pb-4" aria-label="Paginación">
+
+            <ul class="pagination justify-content-center mb-0">
+
+                {% if pagina.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?pagina={{ pagina.previous_page_number }}">Anterior</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Anterior</span>
+                    </li>
+                {% endif %}
+
+                {% if pagina.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?pagina={{ pagina.next_page_number }}">Siguiente</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const tabla = document.querySelector("table");
+
+    if (!tabla) {
+        return;
+    }
+
+    const filas = Array.from(tabla.querySelectorAll("tbody tr")).filter(
+        function (fila) {
+            return fila.querySelector("td") && !fila.querySelector("td.empty-table");
+        }
+    );
+
+    if (!filas.length) {
+        return;
+    }
+
+    function normalizar(texto) {
+        return (texto || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLowerCase();
+    }
+
+    const encabezados = Array.from(tabla.querySelectorAll("thead th")).map(
+        function (th) {
+            return normalizar(th.textContent);
+        }
+    );
+
+    const columnaArea = encabezados.indexOf("area");
+    const columnaEstado = encabezados.indexOf("estado");
+
+    function valorCelda(fila, indice) {
+        const celda = fila.children[indice];
+        return celda ? celda.textContent.replace(/\s+/g, " ").trim() : "";
+    }
+
+    function opciones(indice) {
+        if (indice < 0) {
+            return [];
+        }
+
+        const valores = new Set();
+
+        filas.forEach(function (fila) {
+            const valor = valorCelda(fila, indice);
+
+            if (valor && valor !== "—") {
+                valores.add(valor);
+            }
+        });
+
+        return Array.from(valores).sort(function (a, b) {
+            return a.localeCompare(b, "es");
+        });
+    }
+
+    function crearSelect(id, etiqueta, valores) {
+        const select = document.createElement("select");
+        select.id = id;
+        select.setAttribute("aria-label", etiqueta);
+
+        const primera = document.createElement("option");
+        primera.value = "";
+        primera.textContent = etiqueta;
+        select.appendChild(primera);
+
+        valores.forEach(function (valor) {
+            const opcion = document.createElement("option");
+            opcion.value = normalizar(valor);
+            opcion.textContent = valor;
+            select.appendChild(opcion);
+        });
+
+        return select;
+    }
+
+    // Barra de filtros
+    const barra = document.createElement("div");
+    barra.className = "filter-bar";
+    barra.style.gridTemplateColumns = "minmax(220px, 2fr) repeat(3, minmax(135px, 1fr))";
+
+    const caja = document.createElement("div");
+    caja.className = "search-box";
+    caja.innerHTML =
+        '<i class="bi bi-search"></i>' +
+        '<input type="search" id="trzBuscar" ' +
+        'placeholder="Buscar por título, área, categoría..." ' +
+        'aria-label="Buscar documentos">';
+    barra.appendChild(caja);
+
+    let selectArea = null;
+    let selectEstado = null;
+
+    if (columnaArea >= 0) {
+        selectArea = crearSelect("trzArea", "Todas las áreas", opciones(columnaArea));
+        barra.appendChild(selectArea);
+    }
+
+    if (columnaEstado >= 0) {
+        selectEstado = crearSelect("trzEstado", "Todos los estados", opciones(columnaEstado));
+        barra.appendChild(selectEstado);
+    }
+
+    const limpiar = document.createElement("button");
+    limpiar.type = "button";
+    limpiar.className = "btn-secondary-module";
+    limpiar.style.justifyContent = "center";
+    limpiar.innerHTML = '<i class="bi bi-x-circle"></i> Limpiar';
+    barra.appendChild(limpiar);
+
+    const contador = document.createElement("div");
+    contador.style.cssText = "padding: 0 22px 12px; font-size: .87rem; color: #78818a;";
+
+    const contenedor = tabla.closest(".table-container") || tabla;
+    contenedor.parentNode.insertBefore(barra, contenedor);
+    contenedor.parentNode.insertBefore(contador, contenedor);
+
+    const buscar = document.getElementById("trzBuscar");
+
+    function filtrar() {
+        const texto = normalizar(buscar.value);
+        const area = selectArea ? selectArea.value : "";
+        const estado = selectEstado ? selectEstado.value : "";
+
+        let visibles = 0;
+
+        filas.forEach(function (fila) {
+            const coincide =
+                normalizar(fila.textContent).includes(texto) &&
+                (!area || normalizar(valorCelda(fila, columnaArea)) === area) &&
+                (!estado || normalizar(valorCelda(fila, columnaEstado)) === estado);
+
+            fila.style.display = coincide ? "" : "none";
+
+            if (coincide) {
+                visibles++;
+            }
+        });
+
+        contador.textContent =
+            "Mostrando " + visibles + " de " + filas.length + " documentos";
+    }
+
+    buscar.addEventListener("input", filtrar);
+
+    if (selectArea) {
+        selectArea.addEventListener("change", filtrar);
+    }
+
+    if (selectEstado) {
+        selectEstado.addEventListener("change", filtrar);
+    }
+
+    limpiar.addEventListener("click", function () {
+        buscar.value = "";
+
+        if (selectArea) {
+            selectArea.value = "";
+        }
+
+        if (selectEstado) {
+            selectEstado.value = "";
+        }
+
+        filtrar();
+    });
+
+    filtrar();
+
+});
+</script>
+{% endblock %}

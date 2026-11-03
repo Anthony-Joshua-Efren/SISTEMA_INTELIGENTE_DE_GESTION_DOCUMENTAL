@@ -67,6 +67,20 @@
         </a>
     {% endif %}
 
+    {% if 'version.consultar' in permisos_usuario %}
+        <a href="{% url 'documentos:historial_versiones' documento.pk %}"
+           class="btn-secondary-module">
+            <i class="bi bi-clock-history"></i> Historial de versiones
+        </a>
+    {% endif %}
+
+    {% if 'documento.versionar' in permisos_usuario and documento.estado %}
+        <a href="{% url 'documentos:nueva_version' documento.pk %}"
+           class="btn-secondary-module">
+            <i class="bi bi-file-earmark-plus"></i> Nueva versión
+        </a>
+    {% endif %}
+
     {% if 'documento.archivar' in permisos_usuario %}
         <button type="button"
                 class="btn-secondary-module"

@@ -1,0 +1,417 @@
+{% extends "documentos/base_documentos.html" %}
+{% load documentos_extras %}
+
+{% block titulo_pagina %}Historial del documento{% endblock %}
+{% block titulo_topbar %}Versiones y trazabilidad{% endblock %}
+
+{% block contenido %}
+
+<style>
+    .timeline { list-style: none; margin: 0; padding: 0; }
+    .timeline-item {
+        position: relative;
+        display: flex;
+        gap: 16px;
+        padding: 0 0 26px 0;
+    }
+    .timeline-item:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        left: 19px;
+        top: 42px;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+    }
+    .timeline-icon {
+        flex: 0 0 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #e8efeb;
+        color: var(--green);
+        font-size: 1.1rem;
+    }
+    .timeline-body { flex: 1; min-width: 0; }
+    .timeline-head { font-weight: 700; }
+    .timeline-meta { color: var(--muted); font-size: .85rem; margin-bottom: 8px; }
+    .timeline-body table { font-size: .87rem; margin-top: 6px; }
+    .valor-antes { color: #9a3b32; text-decoration: line-through; }
+    .valor-despues { color: #1b7b4b; font-weight: 600; }
+</style>
+
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">VERSIONES Y TRAZABILIDAD</div>
+        <h1>Historial del documento</h1>
+        <p>
+            «{{ documento.titulo|default:"Sin título" }}»
+            · Área {{ documento.area.nombre|default:"—" }}.
+        </p>
+    </div>
+</div>
+
+<div class="doc-actions">
+
+    <a href="{% url 'documentos:resumen_versiones' %}"
+       class="btn-secondary-module">
+        <i class="bi bi-arrow-left"></i> Volver a versiones
+    </a>
+
+    <a href="{% url 'documentos:detalle_documento' documento.pk %}"
+       class="btn-secondary-module">
+        <i class="bi bi-file-earmark-text"></i> Ver documento
+    </a>
+
+    {% if versiones|length > 1 and 'documento.descargar' in permisos_usuario %}
+        <a href="{% url 'documentos:comparar_versiones' documento.pk %}"
+           class="btn-secondary-module">
+            <i class="bi bi-layout-split"></i> Comparar versiones
+        </a>
+    {% endif %}
+
+    {% if 'auditoria.consultar' in permisos_usuario %}
+    <a href="{% url 'documentos:accesos_documento' documento.pk %}"
+       class="btn-secondary-module">
+        <i class="bi bi-person-lines-fill"></i> Accesos al documento
+    </a>
+    {% endif %}
+
+    {% if 'documento.versionar' in permisos_usuario and documento.estado %}
+        <a href="{% url 'documentos:nueva_version' documento.pk %}"
+           class="btn-new-user"
+           style="text-decoration: none;">
+            <i class="bi bi-file-earmark-plus"></i> Nueva versión
+        </a>
+    {% endif %}
+
+</div>
+
+<!-- ======================= VERSIONES DEL ARCHIVO ======================= -->
+<section class="management-panel mb-4">
+
+    <div class="panel-inner pb-0">
+        <div class="inner-heading">
+            <h2>Versiones del archivo</h2>
+            <p>La versión vigente es la de mayor número. Ninguna versión se borra.</p>
+        </div>
+    </div>
+
+    <div class="table-container">
+
+        <table class="users-table">
+
+            <thead>
+                <tr>
+                    <th>Versión</th>
+                    <th>Situación</th>
+                    <th>Formato</th>
+                    <th>Registrada por</th>
+                    <th>Fecha</th>
+                    <th>Comentario del cambio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for version in versiones %}
+
+                    <tr>
+
+                        <td>
+                            <span class="role-pill">v{{ version.numero_version|default:"1" }}</span>
+                        </td>
+
+                        <td>
+                            {% if forloop.first %}
+                                <span class="status-pill active-status">Vigente</span>
+                            {% else %}
+                                <span class="status-pill inactive-status">Anterior</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if version.formato %}
+                                <span class="format-pill">
+                                    <i class="bi {{ version.formato.extension|icono_formato }}"></i>
+                                    {{ version.formato.extension|etiqueta_formato }}
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>{{ version.usuario.get_full_name|default:version.usuario.username }}</td>
+
+                        <td>
+                            {% if version.fecha_creacion %}
+                                {{ version.fecha_creacion|hora_local|date:"d/m/Y H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td>{{ version.comentario_cambio|default:"—" }}</td>
+
+                        <td>
+                            <div class="action-group">
+
+                                {% if 'documento.descargar' in permisos_usuario %}
+
+                                    {% if version.previsualizable %}
+                                        <a href="{% url 'documentos:vista_previa_version' documento.pk version.pk %}"
+                                           class="action-btn"
+                                           target="_blank"
+                                           rel="noopener"
+                                           title="Ver esta versión"
+                                           aria-label="Ver versión {{ version.numero_version }}">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    {% endif %}
+
+                                    <a href="{% url 'documentos:descargar_version' documento.pk version.pk %}"
+                                       class="action-btn"
+                                       title="Descargar esta versión"
+                                       aria-label="Descargar versión {{ version.numero_version }}">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+
+                                    {% if not forloop.first %}
+                                        <a href="{% url 'documentos:comparar_versiones' documento.pk %}?a={{ version.pk }}&b={{ vigente.pk }}"
+                                           class="action-btn"
+                                           title="Comparar con la versión vigente"
+                                           aria-label="Comparar versión {{ version.numero_version }} con la vigente">
+                                            <i class="bi bi-layout-split"></i>
+                                        </a>
+                                    {% endif %}
+
+                                {% endif %}
+
+                                {% if not forloop.first and 'documento.versionar' in permisos_usuario and documento.estado %}
+                                    <button type="button"
+                                            class="action-btn"
+                                            title="Restaurar esta versión"
+                                            aria-label="Restaurar versión {{ version.numero_version }}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmacionRestaurar"
+                                            data-version="{{ version.numero_version }}"
+                                            data-url="{% url 'documentos:restaurar_version' documento.pk version.pk %}">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                {% endif %}
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="7" class="empty-table">
+                            Este documento todavía no tiene versiones registradas.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<!-- ======================= CAMBIOS DEL DOCUMENTO ======================= -->
+<section class="management-panel">
+
+    <div class="panel-inner">
+
+        <div class="inner-heading">
+            <h2>Cambios del documento</h2>
+            <p>Quién hizo cada cambio, cuándo y qué se modificó.</p>
+        </div>
+
+        <ul class="timeline mt-4">
+
+            {% for evento in eventos %}
+
+                <li class="timeline-item">
+
+                    <span class="timeline-icon">
+                        <i class="bi {{ evento.icono }}"></i>
+                    </span>
+
+                    <div class="timeline-body">
+
+                        <div class="timeline-head">
+                            {{ evento.titulo }}
+                            {% if evento.version %}
+                                <span class="role-pill ms-1">v{{ evento.version }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="timeline-meta">
+                            {{ evento.registro.usuario.get_full_name|default:evento.registro.usuario.username }}
+                            ·
+                            {{ evento.registro.fecha_hora|hora_local|date:"d/m/Y H:i" }}
+                        </div>
+
+                        {% if evento.cambios %}
+
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Campo</th>
+                                        <th>Antes</th>
+                                        <th>Después</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cambio in evento.cambios %}
+                                        <tr>
+                                            <td>{{ cambio.campo }}</td>
+                                            <td class="valor-antes">{{ cambio.antes }}</td>
+                                            <td class="valor-despues">{{ cambio.despues }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                        {% elif evento.origen %}
+
+                            <p class="mb-1">
+                                Se restauró el contenido de la versión
+                                <strong>v{{ evento.origen }}</strong>.
+                            </p>
+
+                        {% elif evento.comentario %}
+
+                            <p class="mb-1">
+                                <span class="text-secondary">Comentario:</span>
+                                {{ evento.comentario }}
+                            </p>
+
+                        {% elif evento.texto %}
+
+                            <p class="mb-1 text-secondary">{{ evento.texto }}</p>
+
+                        {% endif %}
+
+                        {% if evento.comparar and 'documento.descargar' in permisos_usuario %}
+                            <a href="{% url 'documentos:comparar_versiones' documento.pk %}?a={{ evento.comparar.0 }}&b={{ evento.comparar.1 }}"
+                               class="small">
+                                <i class="bi bi-layout-split"></i> Ver qué cambió
+                            </a>
+                        {% endif %}
+
+                    </div>
+
+                </li>
+
+            {% empty %}
+
+                <li class="text-secondary">
+                    Todavía no hay cambios registrados para este documento.
+                </li>
+
+            {% endfor %}
+
+        </ul>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+{% block modales %}
+
+{% if 'documento.versionar' in permisos_usuario and documento.estado %}
+
+<div class="modal fade confirmation-modal"
+     id="confirmacionRestaurar"
+     tabindex="-1"
+     aria-labelledby="tituloRestaurar"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloRestaurar">Restaurar versión</h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="mensajeRestaurar" class="mb-2"></p>
+                <p class="text-secondary small mb-0">
+                    No se borra nada: se crea una versión nueva con el
+                    contenido de la versión elegida y todas las demás se
+                    conservan.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <form method="post" id="formularioRestaurar">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-confirm-action">
+                        Restaurar
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const ventana = document.getElementById("confirmacionRestaurar");
+
+    if (!ventana) {
+        return;
+    }
+
+    ventana.addEventListener("show.bs.modal", function (event) {
+
+        const boton = event.relatedTarget;
+
+        if (!boton) {
+            return;
+        }
+
+        document.getElementById("formularioRestaurar").action =
+            boton.dataset.url;
+
+        document.getElementById("mensajeRestaurar").textContent =
+            "¿Restaurar la versión " + boton.dataset.version +
+            " como la versión vigente del documento?";
+    });
+
+});
+</script>
+
+{% endblock %}

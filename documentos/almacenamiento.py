@@ -62,3 +62,20 @@ def eliminar_archivo(ruta):
         _bucket().remove([ruta])
     except Exception:
         pass
+
+
+
+def copiar_archivo(ruta_origen, documento_id, numero_version):
+    """
+    Crea una copia independiente de un archivo del bucket como nueva
+    versión y devuelve la ruta de la copia.
+    """
+    extension = Path(ruta_origen).suffix.lower()
+    ruta = f"{documento_id}/v{numero_version}_{uuid.uuid4().hex}{extension}"
+
+    tipo = mimetypes.guess_type(ruta_origen)[0] or "application/octet-stream"
+
+    contenido = _bucket().download(ruta_origen)
+    _bucket().upload(ruta, contenido, {"content-type": tipo})
+
+    return ruta
