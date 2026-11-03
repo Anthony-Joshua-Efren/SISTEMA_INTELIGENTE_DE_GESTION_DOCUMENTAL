@@ -1036,3 +1036,59 @@ def accesos_documento(request, documento_id):
             consulta=parametros.urlencode(),
         )
     )
+
+# ==========================================================
+# REGISTRO DE LAS DESCARGAS HECHAS DESDE EL HISTORIAL
+# ==========================================================
+
+from functools import wraps
+
+from auditoria.servicios import Accion, registrar_auditoria
+
+_descargar_version_sin_registro = descargar_version
+
+
+@wraps(_descargar_version_sin_registro)
+def descargar_version(request, *args, **kwargs):
+    """Descarga una versión y deja constancia en la auditoría."""
+    respuesta = _descargar_version_sin_registro(request, *args, **kwargs)
+
+    # Solo se registra si la descarga se entregó correctamente.
+    if getattr(respuesta, "status_code", None) != 200:
+        return respuesta
+
+    try:
+        datos = request.resolver_match.kwargs if request.resolver_match else {}
+
+        documento = Documento.objects.filter(
+            pk=datos.get("documento_id")
+        ).first()
+
+        if documento is not None:
+            version = None
+
+            if datos.get("version_id") is not None:
+                version = VersionDocumento.objects.filter(
+                    pk=datos["version_id"],
+                    documento=documento
+                ).first()
+
+            numero = (
+                " (versión %s)" % version.numero_version
+                if version is not None and version.numero_version
+                else ""
+            )
+
+            registrar_auditoria(
+                request.user,
+                Accion.DOCUMENTO_DESCARGAR,
+                documento,
+                "Descarga desde el historial del documento «%s»%s."
+                % (documento.titulo, numero)
+            )
+
+    except Exception:
+        # Un fallo al registrar nunca debe impedir la descarga.
+        logger.exception("No se pudo registrar la descarga de una versión.")
+
+    return respuesta
