@@ -1,0 +1,110 @@
+
+{% extends "documentos/base_documentos.html" %}
+
+{% block titulo_pagina %}Revisiones, alertas y reportes{% endblock %}
+
+{% block titulo_topbar %}Revisiones, alertas y reportes{% endblock %}
+
+{% block contenido %}
+
+<!-- Encabezado -->
+<div class="module-heading">
+
+    <div>
+
+        <div class="module-eyebrow">
+            GESTIÓN DOCUMENTAL
+        </div>
+
+        <h1>
+            Revisiones, alertas y reportes
+        </h1>
+
+        <p>
+            Seguimiento de revisiones, vencimientos,
+            indicadores y reportes documentales.
+        </p>
+
+    </div>
+
+</div>
+
+{% if puede_descargar_reporte %}
+<div class="doc-actions">
+    <a href="{% url 'alertas_reportes:descargar_reporte' %}" class="btn-secondary-module">
+        <i class="bi bi-download"></i> Descargar reporte
+    </a>
+</div>
+{% endif %}
+
+<!-- Panel de alertas documentales -->
+<section class="management-panel">
+
+    <div class="table-container">
+
+        <table class="users-table">
+
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Fecha de revisión</th>
+                    <th>Fecha de vencimiento</th>
+                    <th>Situación</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                
+{% for documento in documentos %}
+<tr>
+    <td>{{ documento.titulo|default:"Sin título" }}</td>
+
+    <td>{{ documento.fecha_revision|date:"d/m/Y"|default:"—" }}</td>
+
+    <td>{{ documento.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</td>
+
+    <td>
+        {% if documento.fecha_vencimiento and documento.fecha_vencimiento < hoy %}
+            Vencido
+        {% elif documento.fecha_vencimiento == hoy %}
+            Vence hoy
+        {% elif documento.fecha_vencimiento and documento.fecha_vencimiento > hoy and documento.fecha_vencimiento <= limite_aviso %}
+            Próximo a vencer
+        {% elif documento.fecha_revision and documento.fecha_revision < hoy %}
+            Fecha de revisión pasada
+        {% elif documento.fecha_revision == hoy %}
+            Revisión programada hoy
+        {% elif not documento.fecha_revision and not documento.fecha_vencimiento %}
+            Sin fechas registradas
+        {% else %}
+            Sin fechas vencidas
+        {% endif %}
+    </td>
+</tr>
+
+{% empty %}
+<tr>
+    <td colspan="4" class="empty-table">
+        No hay documentos disponibles para consulta.
+    </td>
+</tr>
+{% endfor %}
+
+
+            </tbody>
+
+    </table>
+
+    </div>
+
+    <div class="table-footer">
+        <span>Documentos: {{ total_documentos }}</span>
+        <span>Vencidos: {{ documentos_vencidos }}</span>
+        <span>Próximos a vencer: {{ proximos_vencer }}</span>
+        <span>Revisiones pendientes: {{ revisiones_pendientes }}</span>
+    </div>
+
+</section>
+
+{% endblock %}

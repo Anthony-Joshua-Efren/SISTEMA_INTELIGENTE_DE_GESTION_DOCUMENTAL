@@ -52,7 +52,9 @@
         {% endif %}
 
         {% if modulos.revisiones %}
-        <a href="#" class="sidebar-link" title="Revisiones, alertas y reportes">
+         <a href="{% url 'alertas_reportes:panel_alertas_reportes' %}"
+         class="sidebar-link {% if request.resolver_match.app_name == 'alertas_reportes' %}active{% endif %}"
+         title="Revisiones, alertas y reportes">
             <i class="bi bi-bell"></i>
             <span>Revisiones, alertas y reportes</span>
         </a>
