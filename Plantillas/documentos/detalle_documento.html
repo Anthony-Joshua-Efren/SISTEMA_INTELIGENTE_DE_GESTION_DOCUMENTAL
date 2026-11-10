@@ -192,6 +192,17 @@
                 <dd>{{ documento.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</dd>
             </div>
 
+            <div class="doc-field">
+                <dt>Etiquetas</dt>
+                <dd>
+                    {% for etiqueta in etiquetas %}
+                        <span class="status-pill active-status">{{ etiqueta.nombre }}</span>
+                    {% empty %}
+                        —
+                    {% endfor %}
+                </dd>
+            </div>
+
         </dl>
 
       </div>
