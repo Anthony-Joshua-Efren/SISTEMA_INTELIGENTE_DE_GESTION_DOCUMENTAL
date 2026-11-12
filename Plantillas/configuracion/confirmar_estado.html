@@ -1,0 +1,15 @@
+{% extends 'configuracion/base.html' %}
+{% block configuracion_contenido %}
+<div class="module-heading"><div><div class="module-eyebrow">{{ definicion.titulo }}</div><h1>Confirmar cambio de estado</h1></div></div>
+<section class="management-panel configuration-panel configuration-form">
+    <p>Vas a <strong>{{ accion }}</strong> el registro <strong>{{ registro.nombre|default:'Sin nombre' }}</strong>.</p>
+    {% if accion == 'desactivar' %}<p>Dejará de estar disponible para nuevas selecciones. Los documentos y versiones que ya lo utilizan conservarán su referencia.</p>{% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="configuration-actions">
+            <a class="btn-secondary-module" href="{% url 'configuracion:catalogo' catalogo %}">Cancelar</a>
+            <button class="btn-confirm-action" type="submit">Confirmar {{ accion }}</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

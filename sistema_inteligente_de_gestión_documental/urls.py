@@ -16,4 +16,5 @@ urlpatterns = [
     path('organizacion-busqueda/', include('organizacion_busqueda.urls')),
     path('revisiones-alertas-reportes/', include('alertas_reportes.urls')),
     path('asistencia-inteligente/', include('asistencia_inteligente.urls')),
+    path('configuracion/', include('configuracion.urls')),
 ]

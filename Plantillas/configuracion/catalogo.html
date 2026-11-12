@@ -1,0 +1,53 @@
+{% extends 'configuracion/base.html' %}
+{% block configuracion_contenido %}
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">CATÁLOGOS DOCUMENTALES</div>
+        <h1>{{ definicion.titulo }}</h1>
+        <p>Crea, edita y cambia el estado de los registros sin eliminarlos.</p>
+    </div>
+    <a class="btn-new-user" href="{% url 'configuracion:crear' catalogo %}"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear registro</a>
+</div>
+<div class="configuration-nav">
+    <a class="btn-secondary-module" href="{% url 'configuracion:inicio' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Configuración</a>
+</div>
+<section class="management-panel" aria-label="Registros de {{ definicion.titulo }}">
+    <nav class="module-tabs" aria-label="Catálogos documentales">
+        {% for key, definition in catalogos.items %}
+        <a class="module-tab {% if key == catalogo %}active{% endif %}" {% if key == catalogo %}aria-current="page"{% endif %} href="{% url 'configuracion:catalogo' key %}">{{ definition.titulo }}</a>
+        {% endfor %}
+    </nav>
+    <div class="table-container">
+        <table class="users-table configuration-table">
+            <caption class="visually-hidden">{{ definicion.titulo }}: {{ pagina.paginator.count }} registros</caption>
+            <thead><tr><th scope="col">Nombre</th><th scope="col">{% if catalogo == 'formatos' %}Extensión{% else %}Descripción{% endif %}</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+            <tbody>
+                {% for registro in pagina %}
+                <tr>
+                    <td>{{ registro.nombre|default:'Sin nombre' }}</td>
+                    <td>{% if catalogo == 'formatos' %}{{ registro.extension|default:'Sin extensión' }}{% else %}{{ registro.descripcion|default:'Sin descripción' }}{% endif %}</td>
+                    <td><span class="configuration-status {% if registro.estado %}is-active{% endif %}">{% if registro.estado %}Activo{% else %}Inactivo{% endif %}</span></td>
+                    <td><div class="configuration-actions">
+                        <a class="btn-secondary-module" href="{% url 'configuracion:editar' catalogo registro.pk %}" aria-label="Editar {{ registro.nombre|default:'registro' }}">Editar</a>
+                        {% if registro.estado %}
+                        <a class="btn-secondary-module" href="{% url 'configuracion:estado' catalogo registro.pk 'desactivar' %}" aria-label="Desactivar {{ registro.nombre|default:'registro' }}">Desactivar</a>
+                        {% else %}
+                        <a class="btn-secondary-module" href="{% url 'configuracion:estado' catalogo registro.pk 'activar' %}" aria-label="Activar {{ registro.nombre|default:'registro' }}">Activar</a>
+                        {% endif %}
+                    </div></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="configuration-empty">No hay registros en este catálogo. Crea el primer registro para comenzar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if pagina.has_other_pages %}
+    <nav class="configuration-pagination" aria-label="Paginación del catálogo">
+        {% if pagina.has_previous %}<a class="btn-secondary-module" href="?page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+        <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+        {% if pagina.has_next %}<a class="btn-secondary-module" href="?page={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+/* Scoped additions; shared Sofitel layout and sidebar stay unchanged. */
+.configuration-module .configuration-nav,
+.configuration-module .configuration-actions,
+.configuration-module .configuration-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.configuration-module .configuration-nav { margin-bottom: 22px; }
+.configuration-module .configuration-panel { padding: 28px; margin-bottom: 24px; scroll-margin-top: 20px; }
+.configuration-module h2 { font-family: Georgia, serif; font-size: 1.45rem; color: var(--green); }
+.configuration-module h2 > i { color: var(--gold-dark); margin-right: 8px; }
+.configuration-module .configuration-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+.configuration-module .configuration-card { display: block; padding: 24px; border: 1px solid var(--border); border-radius: 12px; background: var(--background); color: var(--green); text-decoration: none; }
+.configuration-module .configuration-card:hover { border-color: var(--gold-dark); }
+.configuration-module .configuration-card > i { color: var(--gold-dark); font-size: 1.7rem; }
+.configuration-module .configuration-card h3 { margin-top: 15px; font-size: 1.1rem; }
+.configuration-module .configuration-card span { font-size: .9rem; }
+.configuration-module .configuration-note { margin-top: 20px; color: #57636b; }
+.configuration-module .configuration-table { min-width: 640px; }
+.configuration-module .configuration-table td { max-width: 320px; overflow-wrap: anywhere; white-space: normal; }
+.configuration-module .configuration-table .btn-secondary-module { padding: 8px 12px; font-size: .85rem; }
+.configuration-module .configuration-status { display: inline-block; padding: 5px 10px; border-radius: 7px; background: #f2ece3; color: #705936; }
+.configuration-module .configuration-status.is-active { background: #e4f0e9; color: var(--green); }
+.configuration-module .configuration-empty { padding: 36px 22px; text-align: center; color: var(--muted); }
+.configuration-module .configuration-pagination { padding: 20px; justify-content: center; }
+.configuration-module .configuration-form { max-width: 850px; }
+.configuration-module .form-control { border-radius: 9px; min-height: 46px; }
+.configuration-module .form-control:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(197, 155, 75, .13); }
+.configuration-module .module-tab { text-decoration: none; }
+.configuration-module :is(a, button):focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+@media (max-width: 1100px) {
+    .configuration-module .configuration-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 576px) {
+    .configuration-module .configuration-panel { padding: 18px; }
+    .configuration-module .module-heading { flex-wrap: wrap; }
+    .configuration-module h1 { font-size: 1.8rem; }
+    .configuration-module .configuration-nav > a { width: 100%; white-space: normal; }
+}

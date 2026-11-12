@@ -1,0 +1,48 @@
+{% extends 'configuracion/base.html' %}
+{% block configuracion_contenido %}
+<div class="module-heading">
+    <div>
+        <div class="module-eyebrow">ADMINISTRACIÓN DEL SISTEMA</div>
+        <h1>Configuración</h1>
+        <p>Catálogos documentales y valores vigentes del sistema.</p>
+    </div>
+</div>
+<nav class="configuration-nav" aria-label="Apartados de configuración">
+    <a class="btn-secondary-module" href="#catalogos">Catálogos documentales</a>
+    <a class="btn-secondary-module" href="#parametros">Parámetros generales</a>
+    <a class="btn-secondary-module" href="#alertas">Configuración de alertas</a>
+</nav>
+<section id="catalogos" class="management-panel configuration-panel" aria-labelledby="catalogos-title">
+    <h2 id="catalogos-title"><i class="bi bi-collection" aria-hidden="true"></i> Catálogos documentales</h2>
+    <p>Administra los registros disponibles al cargar o editar documentos. Los registros se conservan al desactivarlos.</p>
+    <div class="configuration-grid">
+        {% for key, definition in catalogos.items %}
+        <a class="configuration-card" href="{% url 'configuracion:catalogo' key %}">
+            <i class="bi {{ definition.icono }}" aria-hidden="true"></i>
+            <h3>{{ definition.titulo }}</h3>
+            <span>Consultar y administrar <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+<section id="parametros" class="management-panel configuration-panel" aria-labelledby="parametros-title">
+    <h2 id="parametros-title"><i class="bi bi-sliders" aria-hidden="true"></i> Parámetros generales</h2>
+    <span class="format-pill">Solo lectura</span>
+    <dl class="doc-fields">
+        <div class="doc-field"><dt>Tamaño máximo por archivo</dt><dd>{{ tamano_maximo_mb }} MB</dd></div>
+        <div class="doc-field"><dt>Listado documental</dt><dd>{{ documentos_por_pagina }} documentos por página</dd></div>
+    </dl>
+    <p class="configuration-note">Estos valores se aplican actualmente en la carga de documentos y en el listado documental. No existe almacenamiento de parámetros globales que permita modificarlos desde esta pantalla.</p>
+    <p>Los formatos permitidos se administran únicamente en <a href="{% url 'configuracion:catalogo' 'formatos' %}">Formatos de archivo</a>.</p>
+</section>
+<section id="alertas" class="management-panel configuration-panel" aria-labelledby="alertas-title">
+    <h2 id="alertas-title"><i class="bi bi-bell" aria-hidden="true"></i> Configuración de alertas</h2>
+    <span class="format-pill">Solo lectura</span>
+    <dl class="doc-fields">
+        <div class="doc-field"><dt>Anticipación vigente</dt><dd>7 días antes del vencimiento</dd></div>
+        <div class="doc-field"><dt>Revisiones pendientes</dt><dd>Fecha de revisión anterior a hoy</dd></div>
+        <div class="doc-field"><dt>Documentos vencidos</dt><dd>Fecha de vencimiento anterior a hoy</dd></div>
+    </dl>
+    <p class="configuration-note">Las alertas se calculan al consultar el módulo de revisiones y su reporte. La arquitectura actual no guarda preferencias globales para cambiar la anticipación a 15 o 30 días.</p>
+</section>
+{% endblock %}

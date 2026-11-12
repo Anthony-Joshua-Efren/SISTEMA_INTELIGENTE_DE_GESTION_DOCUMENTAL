@@ -1,0 +1,10 @@
+{% extends 'documentos/base_documentos.html' %}
+{% load static %}
+{% block titulo_pagina %}Configuración{% endblock %}
+{% block titulo_topbar %}Configuración{% endblock %}
+{% block contenido %}
+<div class="configuration-module">
+    <link rel="stylesheet" href="{% static 'css/configuracion.css' %}">
+    {% block configuracion_contenido %}{% endblock %}
+</div>
+{% endblock %}
