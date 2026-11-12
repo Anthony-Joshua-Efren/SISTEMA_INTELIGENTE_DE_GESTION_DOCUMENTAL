@@ -1,0 +1,179 @@
+{# Panel del asistente inteligente. Se incluye dentro del <form> de carga y edición. #}
+<style>
+    .ia-panel { margin-top: 30px; padding: 22px; border: 1px solid #e8e3db; border-radius: 12px; background: #fbf9f4; }
+    .ia-panel h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 1.1rem; font-weight: 700; color: #063b31; }
+    .ia-panel h3 i { color: #c59b4b; }
+    .ia-note { color: #78818a; font-size: .9rem; margin-bottom: 14px; }
+    .ia-btn { padding: 9px 16px; border: 1px solid #063b31; border-radius: 9px; background: white; color: #063b31; font-weight: 600; font-size: .92rem; }
+    .ia-btn:hover { background: #063b31; color: white; }
+    .ia-btn-sec { border-color: #dce1e4; color: #34414a; }
+    .ia-btn-sec:hover { background: #f1f3f4; color: #34414a; }
+    .ia-resultado { margin-top: 16px; }
+    .ia-bloque { padding: 14px 16px; margin-bottom: 12px; border: 1px solid #e8e3db; border-radius: 10px; background: white; }
+    .ia-bloque small { color: #78818a; }
+    .ia-badge { display: inline-block; padding: 2px 9px; border-radius: 20px; background: #e6f0ec; color: #063b31; font-size: .8rem; font-weight: 600; }
+    .ia-etiquetas { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ia-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border: 1px solid #dce1e4; border-radius: 20px; background: white; font-size: .9rem; cursor: pointer; }
+    .ia-chip.sugerida { border-color: #c59b4b; background: #fff8ea; }
+    .ia-chip input { margin: 0; }
+    .ia-sug { font-size: .75rem; color: #9a7222; font-weight: 700; }
+    .ia-msg { color: #69747c; font-size: .93rem; }
+</style>
+
+<div class="ia-panel" id="iaPanel" {% if 'inteligencia.utilizar' in permisos_usuario %}data-url="{% url 'asistencia_inteligente:sugerir' %}"{% endif %}>
+
+{% if 'inteligencia.utilizar' in permisos_usuario %}
+    <h3><i class="bi bi-stars"></i> Asistente inteligente</h3>
+    <p class="ia-note">
+        Puede sugerir una categoría y etiquetas según los datos y el contenido del archivo.
+        Solo sugiere: tú decides qué usar y nada se guarda sin tu confirmación.
+        El análisis se hace dentro del sistema, sin enviar información a servicios externos.
+    </p>
+
+    <button type="button" class="ia-btn" id="iaSugerir">
+        <i class="bi bi-magic me-1"></i> Sugerir categoría y etiquetas
+    </button>
+
+    <div class="ia-resultado" id="iaResultado" hidden>
+        <p class="ia-msg" id="iaMensaje" hidden></p>
+
+        <div class="ia-bloque" id="iaBloqueCategoria" hidden>
+            <strong>Categoría sugerida:</strong>
+            <span id="iaCategoriaNombre"></span>
+            <span class="ia-badge" id="iaCategoriaPorcentaje"></span><br>
+            <small id="iaCategoriaMotivo"></small>
+            <div class="mt-2">
+                <button type="button" class="ia-btn" id="iaUsarCategoria">Usar esta categoría</button>
+                <button type="button" class="ia-btn ia-btn-sec" id="iaDescartar">Descartar sugerencia</button>
+            </div>
+        </div>
+
+        <div class="ia-bloque" id="iaBloqueEtiquetas" hidden>
+            <strong>Etiquetas sugeridas</strong>
+            <small class="d-block mb-2">Las marcadas con ★ son sugeridas; elige las que quieras.</small>
+            <button type="button" class="ia-btn ia-btn-sec" id="iaAplicarEtiquetas">Marcar las sugeridas</button>
+        </div>
+    </div>
+
+{% endif %}
+
+    {% if etiquetas_disponibles %}
+        <div class="ia-bloque mt-3">
+            <strong>Etiquetas del documento</strong>
+            <div class="ia-etiquetas mt-2" id="iaListaEtiquetas">
+                {% for etiqueta in etiquetas_disponibles %}
+                    <label class="ia-chip" data-id="{{ etiqueta.pk }}">
+                        <input type="checkbox" name="etiquetas" value="{{ etiqueta.pk }}"
+                               {% if etiqueta.pk in etiquetas_marcadas %}checked{% endif %}>
+                        {{ etiqueta.nombre }}
+                        <span class="ia-sug" hidden>★</span>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if 'inteligencia.utilizar' in permisos_usuario %}
+    <input type="hidden" name="sug_categoria" id="iaSugCategoria" value="">
+    <input type="hidden" name="sug_etiquetas" id="iaSugEtiquetas" value="">
+    <input type="hidden" name="sug_descartada" id="iaSugDescartada" value="">
+    {% endif %}
+</div>
+
+{% if 'inteligencia.utilizar' in permisos_usuario %}
+<script>
+(function () {
+    const panel = document.getElementById("iaPanel");
+    const form = panel.closest("form");
+    const $ = (id) => document.getElementById(id);
+    let categoriaSugeridaId = null;
+    let etiquetasSugeridas = [];
+
+    function valor(id) { const e = $(id); return e ? e.value : ""; }
+
+    function datosFormulario() {
+        const datos = new FormData();
+        datos.append("csrfmiddlewaretoken", form.querySelector("[name=csrfmiddlewaretoken]").value);
+        datos.append("titulo", valor("id_titulo"));
+        datos.append("descripcion", valor("id_descripcion"));
+        datos.append("proveedor", valor("id_proveedor"));
+        datos.append("sistema_relacionado", valor("id_sistema_relacionado"));
+        datos.append("departamento", valor("id_departamento"));
+        datos.append("tipo_documento", valor("id_tipo_documento"));
+        const archivo = $("id_archivo");
+        if (archivo && archivo.files.length) datos.append("archivo", archivo.files[0]);
+        return datos;
+    }
+
+    function mostrarMensaje(texto) {
+        const m = $("iaMensaje");
+        m.textContent = texto || "";
+        m.hidden = !texto;
+    }
+
+    $("iaSugerir").addEventListener("click", async function () {
+        const boton = this;
+        boton.disabled = true;
+        $("iaResultado").hidden = false;
+        mostrarMensaje("Analizando…");
+
+        try {
+            const respuesta = await fetch(panel.dataset.url, {
+                method: "POST", body: datosFormulario(), credentials: "same-origin",
+            });
+            if (!respuesta.ok) throw new Error();
+            mostrar(await respuesta.json());
+        } catch (e) {
+            mostrarMensaje("No se pudo generar la sugerencia. Puedes clasificar manualmente.");
+        } finally {
+            boton.disabled = false;
+        }
+    });
+
+    function mostrar(r) {
+        mostrarMensaje(r.mensaje || "");
+        $("iaSugDescartada").value = "";
+
+        // Categoría
+        const c = r.categoria;
+        categoriaSugeridaId = c ? c.id : null;
+        $("iaSugCategoria").value = c ? c.id : "";
+        $("iaBloqueCategoria").hidden = !c;
+        if (c) {
+            $("iaCategoriaNombre").textContent = c.nombre;
+            $("iaCategoriaPorcentaje").textContent = "Confianza " + c.porcentaje + " %";
+            $("iaCategoriaMotivo").textContent = c.motivos.join(" · ");
+        }
+
+        // Etiquetas
+        etiquetasSugeridas = r.etiquetas.map((e) => e.id);
+        $("iaSugEtiquetas").value = etiquetasSugeridas.join(",");
+        $("iaBloqueEtiquetas").hidden = etiquetasSugeridas.length === 0;
+        document.querySelectorAll("#iaListaEtiquetas .ia-chip").forEach(function (chip) {
+            const sugerida = etiquetasSugeridas.includes(Number(chip.dataset.id));
+            chip.classList.toggle("sugerida", sugerida);
+            chip.querySelector(".ia-sug").hidden = !sugerida;
+        });
+    }
+
+    $("iaUsarCategoria").addEventListener("click", function () {
+        const select = $("id_categoria");
+        if (select && categoriaSugeridaId) {
+            select.value = String(categoriaSugeridaId);
+            $("iaSugDescartada").value = "";
+        }
+    });
+
+    $("iaDescartar").addEventListener("click", function () {
+        $("iaSugDescartada").value = "1";
+        $("iaBloqueCategoria").hidden = true;
+    });
+
+    $("iaAplicarEtiquetas").addEventListener("click", function () {
+        document.querySelectorAll("#iaListaEtiquetas input[type=checkbox]").forEach(function (cb) {
+            if (etiquetasSugeridas.includes(Number(cb.value))) cb.checked = true;
+        });
+    });
+})();
+</script>
+{% endif %}

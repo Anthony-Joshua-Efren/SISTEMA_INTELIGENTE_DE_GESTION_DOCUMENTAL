@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'auditoria.apps.AuditoriaConfig',
     'organizacion_busqueda.apps.OrganizacionBusquedaConfig',
     'alertas_reportes',
+    'asistencia_inteligente.apps.AsistenciaInteligenteConfig',
 ]
 
 MIDDLEWARE = [

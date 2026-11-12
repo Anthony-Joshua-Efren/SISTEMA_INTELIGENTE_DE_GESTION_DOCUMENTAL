@@ -61,7 +61,9 @@
         {% endif %}
 
         {% if modulos.inteligencia %}
-        <a href="#" class="sidebar-link" title="Funciones inteligentes">
+        <a href="{% url 'asistencia_inteligente:panel' %}"
+         class="sidebar-link {% if request.resolver_match.app_name == 'asistencia_inteligente' %}active{% endif %}"
+         title="Funciones inteligentes">
             <i class="bi bi-stars"></i>
             <span>Funciones inteligentes</span>
         </a>

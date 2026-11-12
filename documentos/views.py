@@ -27,6 +27,9 @@ from .models import Documento, VersionDocumento
 from .permisos import documentos_visibles, es_administrador
 from .trazabilidad import describir_modificacion
 
+from asistencia_inteligente import servicios as asistente
+from .models import Etiqueta
+
 logger = logging.getLogger(__name__)
 
 DOCUMENTOS_POR_PAGINA = 15
@@ -57,6 +60,21 @@ def _contexto(request, **extra):
     }
     contexto.update(extra)
     return contexto
+
+
+def _contexto_asistente(documento=None, post=None):
+    """Datos que necesita el panel del asistente inteligente."""
+    if post is not None:
+        marcadas = {e.pk for e in asistente.etiquetas_elegidas(post)}
+    elif documento is not None:
+        marcadas = asistente.etiquetas_actuales_ids(documento)
+    else:
+        marcadas = set()
+
+    return {
+        "etiquetas_disponibles": Etiqueta.objects.order_by("nombre"),
+        "etiquetas_marcadas": marcadas,
+    }
 
 
 def _version_vigente(documento):
@@ -187,6 +205,12 @@ def cargar_documento(request):
                         % (documento.titulo, archivo.name)
                     )
 
+                    # Asistente inteligente: guarda solo lo que el usuario
+                    # confirmó (etiquetas) y la decisión sobre las sugerencias.
+                    asistente.guardar_decision(
+                        request.user, documento, request.POST
+                    )
+
             except Exception:
                 logger.exception("Error al cargar un documento.")
 
@@ -226,6 +250,9 @@ def cargar_documento(request):
             subtitulo="Registra los datos del documento y adjunta su archivo.",
             accion="Cargar documento",
             es_carga=True,
+            **_contexto_asistente(
+                post=request.POST if request.method == "POST" else None
+            ),
         )
     )
 
@@ -262,6 +289,9 @@ def detalle_documento(request, documento_id):
             version=version,
             tipo_vista_previa=tipo[0] if tipo else None,
             total_versiones=documento.versiones.count(),
+            etiquetas=Etiqueta.objects.filter(
+                documentoetiqueta__documento=documento
+            ).order_by("nombre"),
         )
     )
 
@@ -301,7 +331,11 @@ def editar_documento(request, documento_id):
         )
 
         if formulario.is_valid():
-            if not formulario.has_changed():
+            etiquetas_cambiaron = asistente.hay_cambio_de_etiquetas(
+                documento, request.POST
+            )
+
+            if not formulario.has_changed() and not etiquetas_cambiaron:
                 messages.info(request, "No se realizaron cambios.")
 
                 return redirect(
@@ -317,12 +351,16 @@ def editar_documento(request, documento_id):
             with transaction.atomic():
                 formulario.save()
 
-                registrar_auditoria(
-                    request.user,
-                    Accion.DOCUMENTO_MODIFICAR,
-                    documento,
-                    describir_modificacion(formulario, documento)
+                if formulario.has_changed():
+                    registrar_auditoria(
+                        request.user,
+                        Accion.DOCUMENTO_MODIFICAR,
+                        documento,
+                        describir_modificacion(formulario, documento)
+                    )
 
+                asistente.guardar_decision(
+                    request.user, documento, request.POST
                 )
 
             messages.success(
@@ -353,6 +391,10 @@ def editar_documento(request, documento_id):
             accion="Guardar cambios",
             es_carga=False,
             documento_id=documento_id,
+            **_contexto_asistente(
+                documento=documento,
+                post=request.POST if request.method == "POST" else None
+            ),
         )
     )
 
